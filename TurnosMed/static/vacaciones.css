@@ -1,0 +1,480 @@
+.main .content {
+    padding: 24px 28px 28px;
+    overflow-y: auto;
+    height: calc(100vh - 60px);
+}
+
+.vac-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.vac-header-left { display: flex; flex-direction: column; gap: 10px; }
+
+.vac-header-left h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.vac-filter-row { display: flex; align-items: flex-end; gap: 12px; }
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.filter-group label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    letter-spacing: .2px;
+}
+
+.select-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.select-wrap select {
+    appearance: none;
+    padding: 7px 30px 7px 11px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    background: var(--white);
+    cursor: pointer;
+    outline: none;
+    min-width: 140px;
+}
+
+.select-wrap i {
+    position: absolute;
+    right: 9px;
+    font-size: 11px;
+    color: var(--text-secondary);
+    pointer-events: none;
+}
+
+.vac-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.vac-tab {
+    padding: 8px 16px;
+    border: none;
+    background: transparent;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: color .15s, border-color .15s;
+}
+
+.vac-tab:hover { color: var(--text-primary); }
+.vac-tab.active {
+    color: var(--blue-accent);
+    border-bottom-color: var(--blue-accent);
+    font-weight: 600;
+}
+
+.vac-header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 4px;
+}
+
+.year-display {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary);
+    min-width: 46px;
+    text-align: center;
+}
+
+.btn-year {
+    width: 28px; height: 28px;
+    border-radius: 7px;
+    border: 1px solid var(--border);
+    background: var(--white);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: background .12s;
+    color: var(--text-secondary);
+}
+
+.btn-year:hover { background: var(--bg); color: var(--text-primary); }
+.btn-year i { font-size: 11px; }
+
+.vac-layout {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 20px;
+    align-items: start;
+    margin-bottom: 20px;
+}
+
+.vac-calendars {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+.cal-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 10px;
+    box-shadow: var(--shadow);
+}
+
+.cal-title {
+    text-align: center;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+}
+
+.cal-day-hdr {
+    text-align: center;
+    font-size: 9.5px;
+    font-weight: 600;
+    color: black;
+    padding: 2px 0 4px;
+}
+
+.cal-cell {
+    text-align: center;
+    font-size: 10.5px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    padding: 3px 1px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background .1s, color .1s;
+    line-height: 1.6;
+    user-select: none;
+}
+
+.cal-cell:not(.ocupado):not(.other-month):hover {
+    background: var(--vac-sel-bg);
+    color: var(--vac-sel-text);
+}
+
+.cal-cell.other-month {
+    color: #d1d5db;
+    cursor: default;
+}
+
+.cal-cell.ocupado {
+    background: var(--vac-ocupado-bg);
+    color: var(--vac-ocupado-text);
+    border-radius: 5px;
+    cursor: not-allowed;
+}
+
+.cal-cell.seleccionado {
+    background: var(--vac-sel-bg);
+    color: var(--vac-sel-text);
+    border-radius: 5px;
+}
+
+.cal-cell.ocupado.seleccionado {
+    background: var(--vac-ocupado-bg);
+    color: var(--vac-ocupado-text);
+}
+
+.vac-panel {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    position: sticky;
+    top: 76px;
+}
+
+.vac-search-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.vac-search-wrap i {
+    position: absolute;
+    left: 10px;
+    font-size: 12px;
+    color: black;
+    pointer-events: none;
+}
+
+.vac-search-wrap input {
+    width: 100%;
+    padding: 8px 10px 8px 30px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 12.5px;
+    color: var(--text-primary);
+    background: var(--bg);
+    outline: none;
+    transition: border-color .15s;
+}
+
+.vac-search-wrap input:focus { border-color: var(--blue-accent); background: white; }
+.vac-search-wrap input::placeholder { color: black; }
+
+.vac-staff-card {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 10px 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+}
+
+.staff-avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: #dbeafe;
+    color: #1d4ed8;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.staff-info { display: flex; flex-direction: column; gap: 2px; }
+.staff-info strong { font-size: 13px; font-weight: 700; color: var(--text-primary); }
+.staff-info span   { font-size: 11.5px; color: var(--text-secondary); }
+
+.vac-period-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    flex-wrap: nowrap;
+}
+
+.vac-field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    flex: 2;
+}
+
+.vac-field-group:first-child {
+    flex: 3;
+}
+
+.vac-field-group:last-child {
+    flex: 1;
+}
+
+.vac-field-group label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.vac-date-range {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.vac-date-input {
+    flex: 1;
+    width: 0;
+    min-width: 0;
+    padding: 7px 0px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    background: var(--white);
+    outline: none;
+    text-align: center;
+    transition: border-color .15s;
+}
+
+.vac-date-input:focus { border-color: var(--blue-accent); }
+
+.range-sep {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 500;
+    flex-shrink: 0;
+}
+
+.vac-days-input {
+    width: 100%;
+    padding: 7px 0px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+    background: #f9fafb;
+    outline: none;
+    text-align: center;
+}
+
+.vac-estado-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12.5px;
+}
+
+.estado-label {
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.estado-badge {
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-size: 11.5px;
+    font-weight: 600;
+}
+
+.estado-badge.sin-programar { background: #f3f4f6; color: #6b7280; }
+.estado-badge.programado    { background: #dcfce7; color: #15803d; }
+.estado-badge.aprobado      { background: #dbeafe; color: #1d4ed8; }
+.estado-badge.rechazado     { background: #fee2e2; color: #b91c1c; }
+
+.vac-obs-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.vac-obs-group label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+}
+
+.obs-optional {
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+    color: black;
+    font-size: 11px;
+}
+
+.vac-obs-input {
+    width: 100%;
+    min-height: 80px;
+    padding: 9px 11px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 12.5px;
+    color: var(--text-primary);
+    background: var(--bg);
+    resize: vertical;
+    outline: none;
+    transition: border-color .15s;
+}
+
+.vac-obs-input:focus { border-color: var(--blue-accent); background: white; }
+.vac-obs-input::placeholder { color: black; }
+
+.obs-char-count {
+    text-align: right;
+    font-size: 11px;
+    color: black;
+}
+
+.btn-guardar {
+    width: 100%;
+    padding: 11px;
+    background: var(--blue-accent);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background .15s;
+}
+
+.btn-guardar:hover {
+    background: var(--blue-hover);
+}
+
+.vac-legend {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 4px 0 8px;
+}
+
+.vac-legend .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.legend-dot {
+    width: 18px; height: 18px;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.legend-dot.ocupado     {
+    background: var(--vac-ocupado-bg);
+}
+
+.legend-dot.seleccionado {
+    background: var(--vac-sel-bg);
+    border: 1px solid #a78bfa;
+}
+
+.legend-dot.libre       {
+    background: var(--tag-libre-bg);
+    border: 1px solid var(--border);
+}
