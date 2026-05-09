@@ -1,0 +1,155 @@
+{% load static %}
+<html lang="es">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>TurnioMed — Gestión de Turnos Médicos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'landing.css' %}">
+</head>
+<body>
+
+<!-- ── NAVBAR ── -->
+<header id="l-navbar">
+    <nav class="navbar-landing">
+        <div class="navbar-logo">
+            <img src="{% static 'img/logo.png' %}" alt="Logo">
+            <span><strong>TurnioMed</strong></span>
+        </div>
+        <div class="nav-links">
+            <a href="#about">Nosotros</a>
+            <a href="#functions">Funcionalidades</a>
+            <a href="#app">App Móvil</a>
+        </div>
+        <a href="{% url 'signin' %}" class="login-btn">
+            Iniciar Sesión <i class="fa-solid fa-arrow-right-to-bracket"></i>
+        </a>
+    </nav>
+</header>
+
+<main class="content">
+
+    <!-- ── HERO: texto izq + imagen der ── -->
+    <section class="hero-section">
+        <div class="hero-inner">
+            <div class="hero-text">
+                <h1>Eficiencia que cuida a quienes nos cuidan</h1>
+                <p>Plataforma integral para la gestión, monitoreo y optimización de roles médicos.
+                    Diseñada para simplificar la logística hospitalaria y fortalecer la transparencia en
+                    cada guardia.</p>
+                <a href="{% url 'signin' %}" class="login-btn hero-btn">
+                    Iniciar Sesión <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                </a>
+            </div>
+            <div class="hero-image">
+                <img src="{% static 'img/prototipoweb.png' %}" alt="Dashboard TurnioMed">
+            </div>
+        </div>
+    </section>
+
+    <!-- ── NOSOTROS ── -->
+    <section id="about" class="about-us-section reveal">
+        <div class="about-header">
+            <h2>Nosotros</h2>
+            <p>Somos una plataforma web y móvil orientada a digitalizar y automatizar la gestión
+                de turnos hospitalarios, permitiendo una planificación eficiente, control de
+                incidencias transparente y un canal de comunicación directo entre el personal y
+                la administración.</p>
+        </div>
+        <div class="about-cards">
+            <div class="card-mision">
+                <h3>Misión <i class="fa-solid fa-bullseye"></i></h3>
+                <p><i>"Facilitar la coordinación de los equipos de salud mediante herramientas digitales
+                    precisas que reduzcan la carga administrativa y permitan centrar los esfuerzos en
+                    la atención al paciente".</i></p>
+            </div>
+            <div class="card-vision">
+                <h3>Visión <i class="fa-solid fa-eye"></i></h3>
+                <p><i>"Convertirnos en el estándar tecnológico de gestión operativa para instituciones de
+                    salud, promoviendo un equilibrio justo entre la demanda asistencial y el bienestar
+                    de los profesionales".</i></p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── FUNCIONALIDADES: grid 3×2 ── -->
+    <section id="functions" class="functions-section reveal">
+        <h2>Funcionalidades</h2>
+        <div class="functions-inner">
+            <div class="card-functions">
+                <i class="fa-solid fa-users"></i>
+                <h3>Acceso diferenciado</h3>
+                <p>Roles específicos para Jefes de Área y Personal Asistencial,
+                    garantizando seguridad en la información.</p>
+            </div>
+            <div class="card-functions">
+                <i class="fa-solid fa-calendar-days"></i>
+                <h3>Programación de turnos</h3>
+                <p>Visualización clara de guardias mensuales y semanales
+                    sincronizadas en tiempo real.</p>
+            </div>
+            <div class="card-functions">
+                <i class="fa-solid fa-file-lines"></i>
+                <h3>Solicitudes</h3>
+                <p>Gestión ágil de cambio de turnos, adelanto de vacaciones
+                    y descansos médicos.</p>
+            </div>
+            <div class="card-functions">
+                <i class="fa-solid fa-umbrella-beach"></i>
+                <h3>Vacaciones</h3>
+                <p>Planificación anual y solicitudes de adelantos con vista de
+                    cobertura hospitalaria.</p>
+            </div>
+            <div class="card-functions">
+                <i class="fa-solid fa-chart-line"></i>
+                <h3>Reportes</h3>
+                <p>Exportación de datos a PDF y Excel sobre horas extra,
+                    asistencias y más.</p>
+            </div>
+            <div class="card-functions">
+                <i class="fa-solid fa-bell"></i>
+                <h3>Notificaciones</h3>
+                <p>Alertas en tiempo real sobre cambios de turno, aprobaciones
+                    y recordatorios de guardia.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── APP MÓVIL ── -->
+    <section id="app" class="app-mobile-section reveal">
+        <div class="app-container">
+            <h2>Lleva el control de tu guardia en el bolsillo</h2>
+            <p>Consigue la aplicación TurnioMed y accede a tu calendario y gestiona tus
+                solicitudes directamente desde tu smartphone. Disponible para todo el personal asistencial.</p>
+            <div class="app-content-wrapper">
+                <div class="qr-placeholder">
+                    <img src="{% static 'img/qr.png' %}" alt="Descargar App">
+                    <span>Escanea para descargar</span>
+                </div>
+                <div class="store-buttons">
+                    <a><img src="{% static 'img/google-play.jpg' %}" alt="Google Play"></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<!-- ── FOOTER ── -->
+<footer>
+    <div class="footer-logo">
+        <div class="logo-icon">
+            <img src="{% static 'img/logo.png' %}" alt="Logo">
+        </div>
+        <div class="logo-text">
+            <span><strong>TurnioMed</strong></span>
+        </div>
+    </div>
+    <span>Centro de Ayuda</span>
+    <span>Contáctanos</span>
+    <span>© 2026 TurnioMed – Sistema de Gestión de Turnos Médicos</span>
+</footer>
+
+<script src="{% static 'js/landing.js' %}"></script>
+</body>
+</html>

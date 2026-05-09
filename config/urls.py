@@ -16,17 +16,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from TurnosMed import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-
-    path('signin/', views.signin, name='signin'),
-    path('logout/', views.signout, name='logout'),
-
-    path('', views.home, name='home'),
-    path('turnos/', views.turnos, name='turnos'),
-    path('solicitudes/', views.solicitudes, name='solicitudes'),
-    path('vacaciones/', views.vacaciones, name='vacaciones'),
-    path('reportes/', views.reportes, name='reportes'),
+    path('', include('TurnosMed.urls')),
 ]

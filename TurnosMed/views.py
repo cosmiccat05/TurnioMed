@@ -3,6 +3,9 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 
+def landing(request):
+    return render(request, 'landing.html')
+
 def signin(request):
     """
     Maneja el inicio de sesión único para el sistema.
