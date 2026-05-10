@@ -5,15 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Reportes - Gestión de Turnos Médicos</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="{% static 'base.css' %}">
-    <link rel="stylesheet" href="{% static 'reportes.css' %}">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/reportes.css' %}">
 </head>
 <body>
-
     <aside class="sidebar">
         <div class="sidebar-logo">
             <div class="logo-icon">
-                <img src="../static/img/logo.png" alt="logo">
+                <img src="{% static 'img/logo.png' %}" alt="logo">
             </div>
             <div class="logo-text">
                 <span>Gestión de Turnos Médicos</span>
@@ -60,7 +59,6 @@
         <header class="topbar">
             <div class="topbar-left">
                 <h1>Reportes</h1>
-                <p>Consulta y exporta reportes del área por período.</p>
             </div>
             <div class="topbar-right">
                 <div class="notif-btn">
@@ -75,51 +73,93 @@
         </header>
 
         <div class="content">
+            <div class="rep-layout">
 
-            <!-- ══════════════════════════════════
-                 SECCIÓN 1 — CAMBIOS DE TURNO
-            ══════════════════════════════════ -->
-            <div class="report-section">
-                <div class="section-head">
-                    <div class="section-head-left">
-                        <div class="section-icon blue"><i class="fa-solid fa-arrows-rotate"></i></div>
-                        <div>
-                            <h2 class="section-title">Cambios de turno</h2>
-                            <p class="section-desc">Historial de solicitudes de cambio aprobadas, pendientes y rechazadas.</p>
+                <!-- ══════════════════════════════
+                     COLUMNA IZQUIERDA — Filtros
+                ══════════════════════════════ -->
+                <aside class="rep-sidebar">
+
+                    <!-- Categoría -->
+                    <div class="rep-panel">
+                        <div class="rep-panel-title">
+                            <i class="fa-solid fa-filter"></i> Categoría
+                        </div>
+                        <div class="rep-categories">
+                            <button class="rep-cat active" data-cat="cambios">
+                                <div class="rep-cat-icon blue">
+                                    <i class="fa-solid fa-arrows-rotate"></i>
+                                </div>
+                                <div class="rep-cat-body">
+                                    <span class="rep-cat-name">Cambios de turno</span>
+                                    <span class="rep-cat-count">18 registros</span>
+                                </div>
+                                <i class="fa-solid fa-chevron-right rep-cat-arrow"></i>
+                            </button>
+                            <button class="rep-cat" data-cat="vacaciones">
+                                <div class="rep-cat-icon teal">
+                                    <i class="fa-solid fa-umbrella-beach"></i>
+                                </div>
+                                <div class="rep-cat-body">
+                                    <span class="rep-cat-name">Vacaciones</span>
+                                    <span class="rep-cat-count">4 registros</span>
+                                </div>
+                                <i class="fa-solid fa-chevron-right rep-cat-arrow"></i>
+                            </button>
+                            <button class="rep-cat" data-cat="descansos">
+                                <div class="rep-cat-icon red">
+                                    <i class="fa-solid fa-bed-pulse"></i>
+                                </div>
+                                <div class="rep-cat-body">
+                                    <span class="rep-cat-name">Descansos médicos</span>
+                                    <span class="rep-cat-count">3 registros</span>
+                                </div>
+                                <i class="fa-solid fa-chevron-right rep-cat-arrow"></i>
+                            </button>
+                            <!-- Espacio para futuras categorías -->
+                            <button class="rep-cat disabled" disabled>
+                                <div class="rep-cat-icon gray">
+                                    <i class="fa-solid fa-clock-rotate-left"></i>
+                                </div>
+                                <div class="rep-cat-body">
+                                    <span class="rep-cat-name">Horas extra</span>
+                                    <span class="rep-cat-count rep-soon">Próximamente</span>
+                                </div>
+                            </button>
+                            <button class="rep-cat disabled" disabled>
+                                <div class="rep-cat-icon gray">
+                                    <i class="fa-solid fa-triangle-exclamation"></i>
+                                </div>
+                                <div class="rep-cat-body">
+                                    <span class="rep-cat-name">Incidencias</span>
+                                    <span class="rep-cat-count rep-soon">Próximamente</span>
+                                </div>
+                            </button>
                         </div>
                     </div>
-                    <div class="section-head-right">
-                        <div class="filter-group">
-                            <label>Área</label>
-                            <div class="select-wrap">
-                                <select>
-                                    <option>Sala 1A</option>
-                                    <option>Sala 1B</option>
-                                    <option>Sala 1C</option>
-                                    <option>Sala 2C</option>
-                                </select>
-                                <i class="fa-solid fa-chevron-down"></i>
-                            </div>
+
+                    <!-- Período -->
+                    <div class="rep-panel">
+                        <div class="rep-panel-title">
+                            <i class="fa-regular fa-calendar"></i> Período
                         </div>
-                        <div class="filter-group">
-                            <label>Período</label>
-                            <div class="view-toggle">
-                                <button class="view-btn active" data-target="mes-turnos" data-alt="anio-turnos">Mensual</button>
-                                <button class="view-btn" data-target="anio-turnos" data-alt="mes-turnos">Anual</button>
-                            </div>
+                        <div class="rep-period-toggle">
+                            <button class="rep-period-btn active" data-period="mensual">Mensual</button>
+                            <button class="rep-period-btn" data-period="anual">Anual</button>
                         </div>
-                        <div class="filter-group" id="mes-turnos">
+                        <div class="rep-filter-field" id="rep-mes-wrap">
                             <label>Mes</label>
                             <div class="select-wrap">
                                 <select>
                                     <option>Abril 2026</option>
                                     <option>Marzo 2026</option>
                                     <option>Febrero 2026</option>
+                                    <option>Enero 2026</option>
                                 </select>
                                 <i class="fa-solid fa-chevron-down"></i>
                             </div>
                         </div>
-                        <div class="filter-group hidden" id="anio-turnos">
+                        <div class="rep-filter-field hidden" id="rep-anio-wrap">
                             <label>Año</label>
                             <div class="select-wrap">
                                 <select>
@@ -129,518 +169,351 @@
                                 <i class="fa-solid fa-chevron-down"></i>
                             </div>
                         </div>
-                        <div class="export-btns">
-                            <button class="btn-export pdf"><i class="fa-solid fa-file-pdf"></i> PDF</button>
-                            <button class="btn-export excel"><i class="fa-solid fa-file-excel"></i> Excel</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Stats -->
-                <div class="report-stats four">
-                    <div class="rstat-card">
-                        <div class="rstat-icon blue"><i class="fa-solid fa-arrows-rotate"></i></div>
-                        <div class="rstat-body">
-                            <div class="rstat-label">Total cambios</div>
-                            <div class="rstat-value">18</div>
-                            <div class="rstat-sub">en el período</div>
-                        </div>
-                    </div>
-                    <div class="rstat-card">
-                        <div class="rstat-icon green"><i class="fa-solid fa-circle-check"></i></div>
-                        <div class="rstat-body">
-                            <div class="rstat-label">Aprobados</div>
-                            <div class="rstat-value">14</div>
-                            <div class="rstat-sub">77% del total</div>
-                        </div>
-                    </div>
-                    <div class="rstat-card">
-                        <div class="rstat-icon amber"><i class="fa-solid fa-clock"></i></div>
-                        <div class="rstat-body">
-                            <div class="rstat-label">Pendientes</div>
-                            <div class="rstat-value">3</div>
-                            <div class="rstat-sub">por revisar</div>
-                        </div>
-                    </div>
-                    <div class="rstat-card">
-                        <div class="rstat-icon red"><i class="fa-solid fa-circle-xmark"></i></div>
-                        <div class="rstat-body">
-                            <div class="rstat-label">Rechazados</div>
-                            <div class="rstat-value">1</div>
-                            <div class="rstat-sub">este período</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Gráfico + Tabla -->
-                <div class="report-body">
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <span class="chart-title">Cambios por semana</span>
-                            <span class="chart-period">Abril 2026</span>
-                        </div>
-                        <div class="chart-body">
-                            <svg viewBox="0 0 460 180" xmlns="http://www.w3.org/2000/svg" class="bar-chart">
-                                <text x="22" y="18"  class="axis-label">10</text>
-                                <text x="22" y="63"  class="axis-label">7</text>
-                                <text x="22" y="108" class="axis-label">4</text>
-                                <text x="22" y="153" class="axis-label">1</text>
-                                <line x1="42" y1="14"  x2="455" y2="14"  class="guide-line"/>
-                                <line x1="42" y1="59"  x2="455" y2="59"  class="guide-line"/>
-                                <line x1="42" y1="104" x2="455" y2="104" class="guide-line"/>
-                                <line x1="42" y1="149" x2="455" y2="149" class="guide-line"/>
-                                <!-- Sem 1 -->
-                                <rect x="55"  y="104" width="24" height="56" rx="3" class="bar bar-blue"/>
-                                <rect x="82"  y="125" width="24" height="35" rx="3" class="bar bar-green"/>
-                                <rect x="109" y="159" width="24" height="1"  rx="3" class="bar bar-amber"/>
-                                <!-- Sem 2 -->
-                                <rect x="170" y="79"  width="24" height="81" rx="3" class="bar bar-blue"/>
-                                <rect x="197" y="104" width="24" height="56" rx="3" class="bar bar-green"/>
-                                <rect x="224" y="149" width="24" height="11" rx="3" class="bar bar-amber"/>
-                                <!-- Sem 3 -->
-                                <rect x="285" y="92"  width="24" height="68" rx="3" class="bar bar-blue"/>
-                                <rect x="312" y="115" width="24" height="45" rx="3" class="bar bar-green"/>
-                                <rect x="339" y="153" width="24" height="7"  rx="3" class="bar bar-amber"/>
-                                <!-- Sem 4 -->
-                                <rect x="395" y="120" width="24" height="40" rx="3" class="bar bar-blue"/>
-                                <rect x="422" y="140" width="24" height="20" rx="3" class="bar bar-green"/>
-                                <!-- Labels eje X -->
-                                <text x="95"  y="176" class="axis-label x">Sem 1</text>
-                                <text x="210" y="176" class="axis-label x">Sem 2</text>
-                                <text x="325" y="176" class="axis-label x">Sem 3</text>
-                                <text x="425" y="176" class="axis-label x">Sem 4</text>
-                            </svg>
-                            <div class="chart-legend">
-                                <div class="cl-item"><span class="cl-dot blue"></span> Total</div>
-                                <div class="cl-item"><span class="cl-dot green"></span> Aprobados</div>
-                                <div class="cl-item"><span class="cl-dot amber"></span> Pendientes</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="report-table-wrap">
-                        <div class="table-title-row">
-                            <span class="table-title">Detalle de cambios</span>
-                        </div>
-                        <div class="table-scroll">
-                            <table class="report-table">
-                                <thead>
-                                    <tr>
-                                        <th>Personal</th>
-                                        <th>Fecha</th>
-                                        <th>De</th>
-                                        <th>A</th>
-                                        <th>Intercambia con</th>
-                                        <th>Estado</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td><div class="person-mini"><div class="avatar-sm">JR</div><div><div class="pname">Dr. Juan Ramírez</div><div class="prole">Medicina Interna</div></div></div></td>
-                                        <td>Sáb 04 abr</td>
-                                        <td><span class="sc n4">N4</span></td>
-                                        <td><span class="sc d4">D4</span></td>
-                                        <td>Dra. Ana López</td>
-                                        <td><span class="badge approved">Aprobado</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td><div class="person-mini"><div class="avatar-sm">AL</div><div><div class="pname">Dra. Ana López</div><div class="prole">Cardiología</div></div></div></td>
-                                        <td>Lun 06 abr</td>
-                                        <td><span class="sc m">M</span></td>
-                                        <td><span class="sc t">T</span></td>
-                                        <td>Dra. María Gómez</td>
-                                        <td><span class="badge approved">Aprobado</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td><div class="person-mini"><div class="avatar-sm">MG</div><div><div class="pname">Dra. María Gómez</div><div class="prole">Urgencias</div></div></div></td>
-                                        <td>Mar 07 abr</td>
-                                        <td><span class="sc d">D</span></td>
-                                        <td><span class="sc n">N</span></td>
-                                        <td>Dr. Luis Martínez</td>
-                                        <td><span class="badge pending">Pendiente</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td><div class="person-mini"><div class="avatar-sm">LM</div><div><div class="pname">Dr. Luis Martínez</div><div class="prole">Neumología</div></div></div></td>
-                                        <td>Mié 08 abr</td>
-                                        <td><span class="sc t">T</span></td>
-                                        <td><span class="sc m">M</span></td>
-                                        <td>Dra. Sofía Méndez</td>
-                                        <td><span class="badge approved">Aprobado</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td><div class="person-mini"><div class="avatar-sm">SM</div><div><div class="pname">Dra. Sofía Méndez</div><div class="prole">Endocrinología</div></div></div></td>
-                                        <td>Jue 09 abr</td>
-                                        <td><span class="sc d4">D4</span></td>
-                                        <td><span class="sc n4">N4</span></td>
-                                        <td>Dr. Pedro Sánchez</td>
-                                        <td><span class="badge rejected">Rechazado</span></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ══════════════════════════════════
-                 SECCIÓN 2 — VACACIONES
-            ══════════════════════════════════ -->
-            <div class="report-section">
-                <div class="section-head">
-                    <div class="section-head-left">
-                        <div class="section-icon teal"><i class="fa-solid fa-umbrella-beach"></i></div>
-                        <div>
-                            <h2 class="section-title">Vacaciones</h2>
-                            <p class="section-desc">Registro de vacaciones aprobadas, adelantos y días disponibles por persona.</p>
-                        </div>
-                    </div>
-                    <div class="section-head-right">
-                        <div class="filter-group">
+                        <div class="rep-filter-field">
                             <label>Área</label>
                             <div class="select-wrap">
                                 <select>
                                     <option>Todas las áreas</option>
-                                    <option>Medicina Interna</option>
-                                    <option>Cardiología</option>
+                                    <option>Sala 1A</option>
+                                    <option>Sala 1B</option>
+                                    <option>Sala 2C</option>
                                 </select>
                                 <i class="fa-solid fa-chevron-down"></i>
                             </div>
                         </div>
-                        <div class="filter-group">
-                            <label>Período</label>
-                            <div class="view-toggle">
-                                <button class="view-btn active" data-target="mes-vac" data-alt="anio-vac">Mensual</button>
-                                <button class="view-btn" data-target="anio-vac" data-alt="mes-vac">Anual</button>
+                    </div>
+
+                    <!-- Exportar -->
+                    <div class="rep-panel">
+                        <div class="rep-panel-title">
+                            <i class="fa-solid fa-file-export"></i> Exportar reporte
+                        </div>
+                        <p class="rep-export-hint">Descarga el reporte de la categoría y período seleccionados.</p>
+                        <button class="rep-btn-export pdf">
+                            <i class="fa-solid fa-file-pdf"></i> Exportar en PDF
+                        </button>
+                        <button class="rep-btn-export excel">
+                            <i class="fa-solid fa-file-excel"></i> Exportar en Excel
+                        </button>
+                    </div>
+
+                </aside>
+
+                <!-- ══════════════════════════════
+                     COLUMNA DERECHA — Historial
+                ══════════════════════════════ -->
+                <div class="rep-main">
+
+                    <!-- Cabecera del historial -->
+                    <div class="rep-main-head">
+                        <div class="rep-main-head-left">
+                            <div class="rep-main-icon blue" id="rep-main-icon">
+                                <i class="fa-solid fa-arrows-rotate"></i>
+                            </div>
+                            <div>
+                                <h2 class="rep-main-title" id="rep-main-title">Cambios de turno</h2>
+                                <p class="rep-main-sub" id="rep-main-sub">Abril 2026 · 18 registros</p>
                             </div>
                         </div>
-                        <div class="filter-group" id="mes-vac">
-                            <label>Mes</label>
-                            <div class="select-wrap">
-                                <select>
-                                    <option>Abril 2026</option>
-                                    <option>Marzo 2026</option>
-                                </select>
-                                <i class="fa-solid fa-chevron-down"></i>
+                        <div class="rep-search-wrap">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" placeholder="Buscar por nombre...">
+                        </div>
+                    </div>
+
+                    <!-- Stats resumen -->
+                    <div class="rep-stats-row" id="rep-stats-cambios">
+                        <div class="rep-stat">
+                            <span class="rep-stat-val">18</span>
+                            <span class="rep-stat-label">Total</span>
+                        </div>
+                        <div class="rep-stat-div"></div>
+                        <div class="rep-stat">
+                            <span class="rep-stat-val green">14</span>
+                            <span class="rep-stat-label">Aprobados</span>
+                        </div>
+                        <div class="rep-stat-div"></div>
+                        <div class="rep-stat">
+                            <span class="rep-stat-val amber">3</span>
+                            <span class="rep-stat-label">Pendientes</span>
+                        </div>
+                        <div class="rep-stat-div"></div>
+                        <div class="rep-stat">
+                            <span class="rep-stat-val red">1</span>
+                            <span class="rep-stat-label">Rechazados</span>
+                        </div>
+                    </div>
+
+                    <div class="rep-stats-row hidden" id="rep-stats-vacaciones">
+                        <div class="rep-stat">
+                            <span class="rep-stat-val">4</span>
+                            <span class="rep-stat-label">Solicitudes</span>
+                        </div>
+                        <div class="rep-stat-div"></div>
+                        <div class="rep-stat">
+                            <span class="rep-stat-val green">28</span>
+                            <span class="rep-stat-label">Días aprobados</span>
+                        </div>
+                        <div class="rep-stat-div"></div>
+                        <div class="rep-stat">
+                            <span class="rep-stat-val amber">2</span>
+                            <span class="rep-stat-label">Pendientes</span>
+                        </div>
+                        <div class="rep-stat-div"></div>
+                        <div class="rep-stat">
+                            <span class="rep-stat-val blue">18</span>
+                            <span class="rep-stat-label">Días prom. dispon.</span>
+                        </div>
+                    </div>
+
+                    <div class="rep-stats-row hidden" id="rep-stats-descansos">
+                        <div class="rep-stat">
+                            <span class="rep-stat-val">3</span>
+                            <span class="rep-stat-label">Registros</span>
+                        </div>
+                        <div class="rep-stat-div"></div>
+                        <div class="rep-stat">
+                            <span class="rep-stat-val red">1</span>
+                            <span class="rep-stat-label">En curso</span>
+                        </div>
+                        <div class="rep-stat-div"></div>
+                        <div class="rep-stat">
+                            <span class="rep-stat-val amber">12</span>
+                            <span class="rep-stat-label">Días no laborados</span>
+                        </div>
+                        <div class="rep-stat-div"></div>
+                        <div class="rep-stat">
+                            <span class="rep-stat-val green">3</span>
+                            <span class="rep-stat-label">Con certificado</span>
+                        </div>
+                    </div>
+
+                    <!-- ── HISTORIAL: CAMBIOS DE TURNO ── -->
+                    <div class="rep-history" id="hist-cambios">
+                        <div class="hist-card">
+                            <div class="hist-avatar">JR</div>
+                            <div class="hist-body">
+                                <div class="hist-top">
+                                    <span class="hist-name">Dr. Juan Ramírez</span>
+                                    <span class="badge approved">Aprobado</span>
+                                </div>
+                                <div class="hist-meta">
+                                    <span><i class="fa-solid fa-stethoscope"></i> Medicina Interna</span>
+                                    <span><i class="fa-regular fa-calendar"></i> Sáb 04 abr 2026</span>
+                                </div>
+                                <div class="hist-detail">
+                                    Cambio de turno: <span class="sc n4">N4</span> → <span class="sc d4">D4</span>
+                                    &nbsp;·&nbsp; Intercambia con <strong>Dra. Ana López</strong>
+                                </div>
                             </div>
                         </div>
-                        <div class="filter-group hidden" id="anio-vac">
-                            <label>Año</label>
-                            <div class="select-wrap">
-                                <select>
-                                    <option>2026</option>
-                                    <option>2025</option>
-                                </select>
-                                <i class="fa-solid fa-chevron-down"></i>
+                        <div class="hist-card">
+                            <div class="hist-avatar">AL</div>
+                            <div class="hist-body">
+                                <div class="hist-top">
+                                    <span class="hist-name">Dra. Ana López</span>
+                                    <span class="badge approved">Aprobado</span>
+                                </div>
+                                <div class="hist-meta">
+                                    <span><i class="fa-solid fa-stethoscope"></i> Cardiología</span>
+                                    <span><i class="fa-regular fa-calendar"></i> Lun 06 abr 2026</span>
+                                </div>
+                                <div class="hist-detail">
+                                    Cambio de turno: <span class="sc m">M</span> → <span class="sc t">T</span>
+                                    &nbsp;·&nbsp; Intercambia con <strong>Dra. María Gómez</strong>
+                                </div>
                             </div>
                         </div>
-                        <div class="export-btns">
-                            <button class="btn-export pdf"><i class="fa-solid fa-file-pdf"></i> PDF</button>
-                            <button class="btn-export excel"><i class="fa-solid fa-file-excel"></i> Excel</button>
+                        <div class="hist-card">
+                            <div class="hist-avatar">MG</div>
+                            <div class="hist-body">
+                                <div class="hist-top">
+                                    <span class="hist-name">Dra. María Gómez</span>
+                                    <span class="badge pending">Pendiente</span>
+                                </div>
+                                <div class="hist-meta">
+                                    <span><i class="fa-solid fa-stethoscope"></i> Urgencias</span>
+                                    <span><i class="fa-regular fa-calendar"></i> Mar 07 abr 2026</span>
+                                </div>
+                                <div class="hist-detail">
+                                    Cambio de turno: <span class="sc d">D</span> → <span class="sc n">N</span>
+                                    &nbsp;·&nbsp; Intercambia con <strong>Dr. Luis Martínez</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="hist-card">
+                            <div class="hist-avatar">LM</div>
+                            <div class="hist-body">
+                                <div class="hist-top">
+                                    <span class="hist-name">Dr. Luis Martínez</span>
+                                    <span class="badge approved">Aprobado</span>
+                                </div>
+                                <div class="hist-meta">
+                                    <span><i class="fa-solid fa-stethoscope"></i> Neumología</span>
+                                    <span><i class="fa-regular fa-calendar"></i> Mié 08 abr 2026</span>
+                                </div>
+                                <div class="hist-detail">
+                                    Cambio de turno: <span class="sc t">T</span> → <span class="sc m">M</span>
+                                    &nbsp;·&nbsp; Intercambia con <strong>Dra. Sofía Méndez</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="hist-card">
+                            <div class="hist-avatar">SM</div>
+                            <div class="hist-body">
+                                <div class="hist-top">
+                                    <span class="hist-name">Dra. Sofía Méndez</span>
+                                    <span class="badge rejected">Rechazado</span>
+                                </div>
+                                <div class="hist-meta">
+                                    <span><i class="fa-solid fa-stethoscope"></i> Endocrinología</span>
+                                    <span><i class="fa-regular fa-calendar"></i> Jue 09 abr 2026</span>
+                                </div>
+                                <div class="hist-detail">
+                                    Cambio de turno: <span class="sc d4">D4</span> → <span class="sc n4">N4</span>
+                                    &nbsp;·&nbsp; Intercambia con <strong>Dr. Pedro Sánchez</strong>
+                                </div>
+                            </div>
                         </div>
                     </div>
+
+                    <!-- ── HISTORIAL: VACACIONES ── -->
+                    <div class="rep-history hidden" id="hist-vacaciones">
+                        <div class="hist-card">
+                            <div class="hist-avatar">JR</div>
+                            <div class="hist-body">
+                                <div class="hist-top">
+                                    <span class="hist-name">Dr. Juan Ramírez</span>
+                                    <span class="badge approved">Aprobado</span>
+                                </div>
+                                <div class="hist-meta">
+                                    <span><i class="fa-solid fa-stethoscope"></i> Medicina Interna</span>
+                                    <span><i class="fa-regular fa-calendar"></i> 01 abr – 15 abr 2026</span>
+                                </div>
+                                <div class="hist-detail">
+                                    Tipo: <strong>Ordinarias</strong>
+                                    &nbsp;·&nbsp; <strong>15 días</strong>
+                                    &nbsp;·&nbsp; Días restantes: <strong>15</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="hist-card">
+                            <div class="hist-avatar">AL</div>
+                            <div class="hist-body">
+                                <div class="hist-top">
+                                    <span class="hist-name">Dra. Ana López</span>
+                                    <span class="badge approved">Aprobado</span>
+                                </div>
+                                <div class="hist-meta">
+                                    <span><i class="fa-solid fa-stethoscope"></i> Cardiología</span>
+                                    <span><i class="fa-regular fa-calendar"></i> 10 abr – 17 abr 2026</span>
+                                </div>
+                                <div class="hist-detail">
+                                    Tipo: <strong>Adelanto</strong>
+                                    &nbsp;·&nbsp; <strong>7 días</strong>
+                                    &nbsp;·&nbsp; Días restantes: <strong>23</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="hist-card">
+                            <div class="hist-avatar">MG</div>
+                            <div class="hist-body">
+                                <div class="hist-top">
+                                    <span class="hist-name">Dra. María Gómez</span>
+                                    <span class="badge pending">Pendiente</span>
+                                </div>
+                                <div class="hist-meta">
+                                    <span><i class="fa-solid fa-stethoscope"></i> Urgencias</span>
+                                    <span><i class="fa-regular fa-calendar"></i> 20 abr – 24 abr 2026</span>
+                                </div>
+                                <div class="hist-detail">
+                                    Tipo: <strong>Ordinarias</strong>
+                                    &nbsp;·&nbsp; <strong>5 días</strong>
+                                    &nbsp;·&nbsp; Días restantes: <strong>25</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="hist-card">
+                            <div class="hist-avatar">LM</div>
+                            <div class="hist-body">
+                                <div class="hist-top">
+                                    <span class="hist-name">Dr. Luis Martínez</span>
+                                    <span class="badge approved">Aprobado</span>
+                                </div>
+                                <div class="hist-meta">
+                                    <span><i class="fa-solid fa-stethoscope"></i> Neumología</span>
+                                    <span><i class="fa-regular fa-calendar"></i> 05 abr – 15 abr 2026</span>
+                                </div>
+                                <div class="hist-detail">
+                                    Tipo: <strong>Ordinarias</strong>
+                                    &nbsp;·&nbsp; <strong>10 días</strong>
+                                    &nbsp;·&nbsp; Días restantes: <strong>20</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ── HISTORIAL: DESCANSOS ── -->
+                    <div class="rep-history hidden" id="hist-descansos">
+                        <div class="hist-card">
+                            <div class="hist-avatar">JR</div>
+                            <div class="hist-body">
+                                <div class="hist-top">
+                                    <span class="hist-name">Dr. Juan Ramírez</span>
+                                    <span class="badge approved">Aprobado</span>
+                                </div>
+                                <div class="hist-meta">
+                                    <span><i class="fa-solid fa-stethoscope"></i> Medicina Interna</span>
+                                    <span><i class="fa-regular fa-calendar"></i> 01 abr – 08 abr 2026</span>
+                                </div>
+                                <div class="hist-detail">
+                                    Diagnóstico: <strong>Lumbago agudo</strong>
+                                    &nbsp;·&nbsp; <strong>8 días</strong>
+                                    &nbsp;·&nbsp; Certificado: <span class="cert yes"><i class="fa-solid fa-check"></i> Adjunto</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="hist-card">
+                            <div class="hist-avatar">AL</div>
+                            <div class="hist-body">
+                                <div class="hist-top">
+                                    <span class="hist-name">Dra. Ana López</span>
+                                    <span class="badge approved">Aprobado</span>
+                                </div>
+                                <div class="hist-meta">
+                                    <span><i class="fa-solid fa-stethoscope"></i> Cardiología</span>
+                                    <span><i class="fa-regular fa-calendar"></i> 10 abr – 14 abr 2026</span>
+                                </div>
+                                <div class="hist-detail">
+                                    Diagnóstico: <strong>Síndrome gripal</strong>
+                                    &nbsp;·&nbsp; <strong>4 días</strong>
+                                    &nbsp;·&nbsp; Certificado: <span class="cert yes"><i class="fa-solid fa-check"></i> Adjunto</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="hist-card">
+                            <div class="hist-avatar">MG</div>
+                            <div class="hist-body">
+                                <div class="hist-top">
+                                    <span class="hist-name">Dra. María Gómez</span>
+                                    <span class="badge pending">Pendiente</span>
+                                </div>
+                                <div class="hist-meta">
+                                    <span><i class="fa-solid fa-stethoscope"></i> Urgencias</span>
+                                    <span><i class="fa-regular fa-calendar"></i> 18 abr 2026 · En curso</span>
+                                </div>
+                                <div class="hist-detail">
+                                    Diagnóstico: <strong>Gastroenteritis</strong>
+                                    &nbsp;·&nbsp; Certificado: <span class="cert pending"><i class="fa-solid fa-clock"></i> Pendiente</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
+                <!-- fin rep-main -->
 
-                <div class="report-stats four">
-                    <div class="rstat-card">
-                        <div class="rstat-icon teal"><i class="fa-solid fa-umbrella-beach"></i></div>
-                        <div class="rstat-body">
-                            <div class="rstat-label">En vacaciones</div>
-                            <div class="rstat-value">2</div>
-                            <div class="rstat-sub">este mes</div>
-                        </div>
-                    </div>
-                    <div class="rstat-card">
-                        <div class="rstat-icon green"><i class="fa-solid fa-calendar-check"></i></div>
-                        <div class="rstat-body">
-                            <div class="rstat-label">Días aprobados</div>
-                            <div class="rstat-value">28</div>
-                            <div class="rstat-sub">en el período</div>
-                        </div>
-                    </div>
-                    <div class="rstat-card">
-                        <div class="rstat-icon amber"><i class="fa-solid fa-hourglass-half"></i></div>
-                        <div class="rstat-body">
-                            <div class="rstat-label">Pendientes</div>
-                            <div class="rstat-value">2</div>
-                            <div class="rstat-sub">por revisar</div>
-                        </div>
-                    </div>
-                    <div class="rstat-card">
-                        <div class="rstat-icon blue"><i class="fa-solid fa-calculator"></i></div>
-                        <div class="rstat-body">
-                            <div class="rstat-label">Días prom. disponibles</div>
-                            <div class="rstat-value">18</div>
-                            <div class="rstat-sub">por persona</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="report-body">
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <span class="chart-title">Días tomados por persona</span>
-                            <span class="chart-period">Abril 2026</span>
-                        </div>
-                        <div class="chart-body">
-                            <svg viewBox="0 0 460 180" xmlns="http://www.w3.org/2000/svg" class="bar-chart">
-                                <text x="22" y="18"  class="axis-label">15</text>
-                                <text x="22" y="63"  class="axis-label">10</text>
-                                <text x="22" y="108" class="axis-label">5</text>
-                                <text x="22" y="153" class="axis-label">0</text>
-                                <line x1="42" y1="14"  x2="455" y2="14"  class="guide-line"/>
-                                <line x1="42" y1="59"  x2="455" y2="59"  class="guide-line"/>
-                                <line x1="42" y1="104" x2="455" y2="104" class="guide-line"/>
-                                <line x1="42" y1="149" x2="455" y2="149" class="guide-line"/>
-
-                                <rect x="55"  y="14"  width="44" height="136" rx="4" class="bar bar-teal"/>
-                                <rect x="140" y="59"  width="44" height="91"  rx="4" class="bar bar-teal"/>
-                                <rect x="225" y="104" width="44" height="46"  rx="4" class="bar bar-teal"/>
-                                <rect x="310" y="37"  width="44" height="113" rx="4" class="bar bar-teal"/>
-                                <rect x="395" y="82"  width="44" height="68"  rx="4" class="bar bar-teal"/>
-
-                                <text x="77"  y="176" class="axis-label x">Ramírez</text>
-                                <text x="162" y="176" class="axis-label x">López</text>
-                                <text x="247" y="176" class="axis-label x">Gómez</text>
-                                <text x="332" y="176" class="axis-label x">Martínez</text>
-                                <text x="417" y="176" class="axis-label x">Méndez</text>
-                            </svg>
-                        </div>
-                    </div>
-
-                    <div class="report-table-wrap">
-                        <div class="table-title-row">
-                            <span class="table-title">Detalle de vacaciones</span>
-                        </div>
-                        <div class="table-scroll">
-                            <table class="report-table">
-                                <thead>
-                                    <tr>
-                                        <th>Personal</th>
-                                        <th>Fecha inicio</th>
-                                        <th>Fecha fin</th>
-                                        <th>Días</th>
-                                        <th>Tipo</th>
-                                        <th>Estado</th>
-                                        <th>Días restantes</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td><div class="person-mini"><div class="avatar-sm">JR</div><div><div class="pname">Dr. Juan Ramírez</div><div class="prole">Medicina Interna</div></div></div></td>
-                                        <td>01 abr 2026</td>
-                                        <td>15 abr 2026</td>
-                                        <td><strong>15</strong></td>
-                                        <td>Ordinarias</td>
-                                        <td><span class="badge approved">Aprobado</span></td>
-                                        <td>15 días</td>
-                                    </tr>
-                                    <tr>
-                                        <td><div class="person-mini"><div class="avatar-sm">AL</div><div><div class="pname">Dra. Ana López</div><div class="prole">Cardiología</div></div></div></td>
-                                        <td>10 abr 2026</td>
-                                        <td>17 abr 2026</td>
-                                        <td><strong>7</strong></td>
-                                        <td>Adelanto</td>
-                                        <td><span class="badge approved">Aprobado</span></td>
-                                        <td>23 días</td>
-                                    </tr>
-                                    <tr>
-                                        <td><div class="person-mini"><div class="avatar-sm">MG</div><div><div class="pname">Dra. María Gómez</div><div class="prole">Urgencias</div></div></div></td>
-                                        <td>20 abr 2026</td>
-                                        <td>24 abr 2026</td>
-                                        <td><strong>5</strong></td>
-                                        <td>Ordinarias</td>
-                                        <td><span class="badge pending">Pendiente</span></td>
-                                        <td>25 días</td>
-                                    </tr>
-                                    <tr>
-                                        <td><div class="person-mini"><div class="avatar-sm">LM</div><div><div class="pname">Dr. Luis Martínez</div><div class="prole">Neumología</div></div></div></td>
-                                        <td>05 abr 2026</td>
-                                        <td>15 abr 2026</td>
-                                        <td><strong>10</strong></td>
-                                        <td>Ordinarias</td>
-                                        <td><span class="badge approved">Aprobado</span></td>
-                                        <td>20 días</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
             </div>
-
-            <!-- ══════════════════════════════════
-                 SECCIÓN 3 — DESCANSOS MÉDICOS
-            ══════════════════════════════════ -->
-            <div class="report-section">
-                <div class="section-head">
-                    <div class="section-head-left">
-                        <div class="section-icon red"><i class="fa-solid fa-bed-pulse"></i></div>
-                        <div>
-                            <h2 class="section-title">Descansos médicos</h2>
-                            <p class="section-desc">Registro de bajas por descanso médico justificado con certificado.</p>
-                        </div>
-                    </div>
-                    <div class="section-head-right">
-                        <div class="filter-group">
-                            <label>Área</label>
-                            <div class="select-wrap">
-                                <select>
-                                    <option>Todas las áreas</option>
-                                    <option>Medicina Interna</option>
-                                    <option>Cardiología</option>
-                                </select>
-                                <i class="fa-solid fa-chevron-down"></i>
-                            </div>
-                        </div>
-                        <div class="filter-group">
-                            <label>Período</label>
-                            <div class="view-toggle">
-                                <button class="view-btn active" data-target="mes-desc" data-alt="anio-desc">Mensual</button>
-                                <button class="view-btn" data-target="anio-desc" data-alt="mes-desc">Anual</button>
-                            </div>
-                        </div>
-                        <div class="filter-group" id="mes-desc">
-                            <label>Mes</label>
-                            <div class="select-wrap">
-                                <select>
-                                    <option>Abril 2026</option>
-                                    <option>Marzo 2026</option>
-                                </select>
-                                <i class="fa-solid fa-chevron-down"></i>
-                            </div>
-                        </div>
-                        <div class="filter-group hidden" id="anio-desc">
-                            <label>Año</label>
-                            <div class="select-wrap">
-                                <select>
-                                    <option>2026</option>
-                                    <option>2025</option>
-                                </select>
-                                <i class="fa-solid fa-chevron-down"></i>
-                            </div>
-                        </div>
-                        <div class="export-btns">
-                            <button class="btn-export pdf"><i class="fa-solid fa-file-pdf"></i> PDF</button>
-                            <button class="btn-export excel"><i class="fa-solid fa-file-excel"></i> Excel</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="report-stats four">
-                    <div class="rstat-card">
-                        <div class="rstat-icon red"><i class="fa-solid fa-bed-pulse"></i></div>
-                        <div class="rstat-body">
-                            <div class="rstat-label">Descansos activos</div>
-                            <div class="rstat-value">1</div>
-                            <div class="rstat-sub">en curso</div>
-                        </div>
-                    </div>
-                    <div class="rstat-card">
-                        <div class="rstat-icon amber"><i class="fa-solid fa-calendar-xmark"></i></div>
-                        <div class="rstat-body">
-                            <div class="rstat-label">Días no laborados</div>
-                            <div class="rstat-value">12</div>
-                            <div class="rstat-sub">este mes</div>
-                        </div>
-                    </div>
-                    <div class="rstat-card">
-                        <div class="rstat-icon green"><i class="fa-solid fa-file-medical"></i></div>
-                        <div class="rstat-body">
-                            <div class="rstat-label">Con certificado</div>
-                            <div class="rstat-value">3</div>
-                            <div class="rstat-sub">documentados</div>
-                        </div>
-                    </div>
-                    <div class="rstat-card">
-                        <div class="rstat-icon blue"><i class="fa-solid fa-users"></i></div>
-                        <div class="rstat-body">
-                            <div class="rstat-label">Personal afectado</div>
-                            <div class="rstat-value">3</div>
-                            <div class="rstat-sub">este período</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="report-body">
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <span class="chart-title">Días de descanso por persona</span>
-                            <span class="chart-period">Abril 2026</span>
-                        </div>
-                        <div class="chart-body">
-                            <svg viewBox="0 0 460 180" xmlns="http://www.w3.org/2000/svg" class="bar-chart">
-                                <text x="22" y="18"  class="axis-label">8</text>
-                                <text x="22" y="63"  class="axis-label">6</text>
-                                <text x="22" y="108" class="axis-label">3</text>
-                                <text x="22" y="153" class="axis-label">0</text>
-                                <line x1="42" y1="14"  x2="455" y2="14"  class="guide-line"/>
-                                <line x1="42" y1="59"  x2="455" y2="59"  class="guide-line"/>
-                                <line x1="42" y1="104" x2="455" y2="104" class="guide-line"/>
-                                <line x1="42" y1="149" x2="455" y2="149" class="guide-line"/>
-
-                                <rect x="90"  y="14"  width="54" height="136" rx="4" class="bar bar-red"/>
-                                <rect x="225" y="82"  width="54" height="68"  rx="4" class="bar bar-red"/>
-                                <rect x="360" y="104" width="54" height="46"  rx="4" class="bar bar-red"/>
-
-                                <text x="117" y="176" class="axis-label x">Ramírez</text>
-                                <text x="252" y="176" class="axis-label x">López</text>
-                                <text x="387" y="176" class="axis-label x">Gómez</text>
-                            </svg>
-                        </div>
-                    </div>
-
-                    <div class="report-table-wrap">
-                        <div class="table-title-row">
-                            <span class="table-title">Detalle de descansos médicos</span>
-                        </div>
-                        <div class="table-scroll">
-                            <table class="report-table">
-                                <thead>
-                                    <tr>
-                                        <th>Personal</th>
-                                        <th>Fecha inicio</th>
-                                        <th>Fecha fin</th>
-                                        <th>Días</th>
-                                        <th>Diagnóstico</th>
-                                        <th>Certificado</th>
-                                        <th>Estado</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td><div class="person-mini"><div class="avatar-sm">JR</div><div><div class="pname">Dr. Juan Ramírez</div><div class="prole">Medicina Interna</div></div></div></td>
-                                        <td>01 abr 2026</td>
-                                        <td>08 abr 2026</td>
-                                        <td><strong>8</strong></td>
-                                        <td>Lumbago agudo</td>
-                                        <td><span class="cert yes"><i class="fa-solid fa-check"></i> Adjunto</span></td>
-                                        <td><span class="badge approved">Aprobado</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td><div class="person-mini"><div class="avatar-sm">AL</div><div><div class="pname">Dra. Ana López</div><div class="prole">Cardiología</div></div></div></td>
-                                        <td>10 abr 2026</td>
-                                        <td>14 abr 2026</td>
-                                        <td><strong>4</strong></td>
-                                        <td>Síndrome gripal</td>
-                                        <td><span class="cert yes"><i class="fa-solid fa-check"></i> Adjunto</span></td>
-                                        <td><span class="badge approved">Aprobado</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td><div class="person-mini"><div class="avatar-sm">MG</div><div><div class="pname">Dra. María Gómez</div><div class="prole">Urgencias</div></div></div></td>
-                                        <td>18 abr 2026</td>
-                                        <td>—</td>
-                                        <td><strong>En curso</strong></td>
-                                        <td>Gastroenteritis</td>
-                                        <td><span class="cert pending"><i class="fa-solid fa-clock"></i> Pendiente</span></td>
-                                        <td><span class="badge pending">Pendiente</span></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
         </div>
 
         <footer class="page-footer">
@@ -650,23 +523,65 @@
     </main>
 
 <script>
-    /* Toggle mensual / anual por sección */
-    document.querySelectorAll('.view-btn[data-target]').forEach(btn => {
+    /* ── Cambio de categoría ── */
+    const catMeta = {
+        cambios:    { icon: 'fa-arrows-rotate',  color: 'blue', title: 'Cambios de turno',  sub: 'Abril 2026 · 18 registros' },
+        vacaciones: { icon: 'fa-umbrella-beach', color: 'teal', title: 'Vacaciones',         sub: 'Abril 2026 · 4 registros'  },
+        descansos:  { icon: 'fa-bed-pulse',      color: 'red',  title: 'Descansos médicos', sub: 'Abril 2026 · 3 registros'  },
+    };
+
+    document.querySelectorAll('.rep-cat:not(.disabled)').forEach(btn => {
         btn.addEventListener('click', () => {
-            const group = btn.closest('.view-toggle');
-            group.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+            const cat = btn.dataset.cat;
+
+            /* Botones activos */
+            document.querySelectorAll('.rep-cat').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            document.getElementById(btn.dataset.target).classList.remove('hidden');
-            document.getElementById(btn.dataset.alt).classList.add('hidden');
+
+            /* Header */
+            const m = catMeta[cat];
+            const iconEl = document.getElementById('rep-main-icon');
+            iconEl.className = `rep-main-icon ${m.color}`;
+            iconEl.innerHTML = `<i class="fa-solid ${m.icon}"></i>`;
+            document.getElementById('rep-main-title').textContent = m.title;
+            document.getElementById('rep-main-sub').textContent   = m.sub;
+
+            /* Stats */
+            document.querySelectorAll('.rep-stats-row').forEach(r => r.classList.add('hidden'));
+            document.getElementById(`rep-stats-${cat}`).classList.remove('hidden');
+
+            /* Historial */
+            document.querySelectorAll('.rep-history').forEach(h => h.classList.add('hidden'));
+            document.getElementById(`hist-${cat}`).classList.remove('hidden');
         });
     });
 
-    /* Exportar placeholder */
-    document.querySelectorAll('.btn-export').forEach(btn => {
+    /* ── Toggle mensual / anual ── */
+    document.querySelectorAll('.rep-period-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.rep-period-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const isMensual = btn.dataset.period === 'mensual';
+            document.getElementById('rep-mes-wrap').classList.toggle('hidden', !isMensual);
+            document.getElementById('rep-anio-wrap').classList.toggle('hidden', isMensual);
+        });
+    });
+
+    /* ── Exportar placeholder ── */
+    document.querySelectorAll('.rep-btn-export').forEach(btn => {
         btn.addEventListener('click', () => {
             const tipo = btn.classList.contains('pdf') ? 'PDF' : 'Excel';
-            const seccion = btn.closest('.report-section').querySelector('.section-title').textContent;
-            alert(`Exportando "${seccion}" en ${tipo}...\n(Se conecta al backend Django)`);
+            const cat  = document.querySelector('.rep-cat.active')?.dataset.cat || '—';
+            alert(`Exportando "${catMeta[cat]?.title}" en ${tipo}...\n(Se conecta al backend Django)`);
+        });
+    });
+
+    /* ── Buscar en historial ── */
+    document.querySelector('.rep-search-wrap input').addEventListener('input', function () {
+        const q = this.value.toLowerCase();
+        document.querySelectorAll('.rep-history:not(.hidden) .hist-card').forEach(card => {
+            const name = card.querySelector('.hist-name').textContent.toLowerCase();
+            card.style.display = name.includes(q) ? '' : 'none';
         });
     });
 </script>
