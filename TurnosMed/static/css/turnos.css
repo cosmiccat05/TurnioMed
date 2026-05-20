@@ -1,4 +1,4 @@
-
+/*turnos.css*/
 /* ── FILTROS BAR ── */
 .filters-bar {
     display: flex;
@@ -144,7 +144,7 @@
 .tip-right {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 10px;
     flex-shrink: 0;
 }
 
@@ -612,32 +612,27 @@
 .hours-status.ok     { background: #dcfce7; color: #15803d; }
 .hours-status.ok i   { color: #16a34a; }
 
-.btn-report {
-    width: 100%;
-    margin-top: 10px;
-    padding: 8px;
-    background: var(--white);
-    border: 1px solid var(--border);
-    border-radius: 7px;
-    font-family: inherit;
-    font-size: 12.5px;
-    font-weight: 500;
-    color: var(--blue-accent);
-    cursor: pointer;
-    transition: background .12s;
+/*NUEVO PARA EL JS*/
+/* Celda seleccionada principal o múltiple */
+.schedule-table tbody td.editable-cell.selected {
+    background: #eff6ff;
+    outline: 2px solid var(--blue-accent);
+    outline-offset: -2px;
 }
 
-.btn-report:hover { background: #eff6ff; }
+/* Cuando hay varias seleccionadas, se verá como bloque de edición */
+.schedule-table tbody td.editable-cell.selected .shift-cell {
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.18);
+}
 
-/* ── FOOTER ── */
-.page-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 14px 32px;
-    border-top: 1px solid var(--border);
-    font-size: 12px;
-    color: var(--text-secondary);
-    background: var(--white);
-    margin-top: auto;
+/* Mejora visual de celdas vacías para que parezcan editables tipo sheet */
+.schedule-table tbody td.editable-cell .shift-cell.empty {
+    background: #ffffff;
+    border: 1.5px dashed #cbd5e1;
+}
+
+/* Al pasar el mouse, la celda vacía indica que se puede escribir */
+.schedule-table tbody td.editable-cell:hover .shift-cell.empty {
+    background: #f8fafc;
+    border-color: var(--blue-accent);
 }

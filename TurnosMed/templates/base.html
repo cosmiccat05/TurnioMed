@@ -1,0 +1,104 @@
+{% load static %}
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}TurnioMed{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <div class="logo-icon">
+                <img src="{% static 'img/logo.png' %}" alt="Logo">
+            </div>
+            <div class="logo-text">
+                <span>Gestión de Turnos Médicos</span>
+                <strong>TurnioMed</strong>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="{% url 'home' %}" class="nav-item {% block nav_home %}{% endblock %}">
+                <i class="fa-solid fa-house"></i> Inicio
+            </a>
+            <a href="{% url 'turnos' %}" class="nav-item {% block nav_turnos %}{% endblock %}">
+                <i class="fa-solid fa-calendar-days"></i> Turnos
+            </a>
+            <a href="{% url 'solicitudes' %}" class="nav-item {% block nav_solicitudes %}{% endblock %}">
+                <i class="fa-solid fa-file-lines"></i> Solicitudes
+                {% if total_pendientes %}
+                    <span class="nav-badge">{{ total_pendientes }}</span>
+                {% endif %}
+            </a>
+            <a href="{% url 'vacaciones' %}" class="nav-item {% block nav_vacaciones %}{% endblock %}">
+                <i class="fa-solid fa-umbrella-beach"></i> Vacaciones
+            </a>
+            <a href="{% url 'reportes' %}" class="nav-item {% block nav_reportes %}{% endblock %}">
+                <i class="fa-solid fa-chart-line"></i> Reportes
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fa-solid fa-gear"></i> Configuración
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fa-regular fa-circle-question"></i> Ayuda
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-card" id="userCard">
+                <div class="user-dropdown" id="userDropdown">
+                    <a href="#" class="dropdown-item">
+                        <i class="fa-solid fa-user-doctor"></i> Perfil
+                    </a>
+                    <hr>
+                    <a href="{% url 'logout' %}" class="dropdown-item logout-text">
+                        <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión
+                    </a>
+                </div>
+                <div class="user-avatar">
+                    {{ request.user.nombre|first|upper }}{{ request.user.apellidos|first|upper }}
+                </div>
+                <div class="user-info">
+                    <strong>{{ request.user.nombre_completo }}</strong>
+                    <span>{{ request.user.cargo_display }}</span>
+                </div>
+                <i class="fa-solid fa-chevron-down"></i>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main">
+        <header class="topbar">
+            <div class="topbar-left">
+                <h1>{% block page_title %}{% endblock %}</h1>
+            </div>
+            <div class="topbar-right">
+                <div class="notif-btn">
+                    <i class="fa-regular fa-bell"></i>
+                    <span class="notif-dot"></span>
+                </div>
+                <div class="topbar-date">
+                    <div class="date">{{ hoy|date:"l, d \d\e F \d\e Y" }}</div>
+                    <div class="time" id="reloj">--:--</div>
+                </div>
+            </div>
+        </header>
+
+        <div class="content">
+            {% block content %}{% endblock %}
+        </div>
+
+        <footer class="page-footer">
+            <span>© 2026 Hospital de Emergencias Pediátricas – Gestión de Turnos Médicos</span>
+            <span>Versión 1.0.0</span>
+        </footer>
+    </main>
+
+    <script src="{% static 'js/base.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -5,19 +5,29 @@
     <title>Login - TurnosMed</title>
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
     <link rel="stylesheet" href="{% static 'css/login.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
     <div class="login-box">
-        <h2 style="text-align: center;">TurnosMed</h2>
+        <a href="{% url 'landing' %}">
+            <i class="fa-solid fa-arrow-left"></i>
+        </a>
+        <h2 style="text-align: center;">
+            TurnosMed
+        </h2>
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-error">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
         <form method="POST">
             {% csrf_token %}
-            {% if error %}
-                <div class="error-msg">
-                    {{ error }}
-                </div>
-            {% endif %}
             {{ form.as_p }}
-            <button type="submit">Ingresar</button>
+            <button type="submit">
+                Ingresar
+            </button>
         </form>
     </div>
 </body>

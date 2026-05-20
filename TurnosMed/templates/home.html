@@ -1,263 +1,168 @@
+{% extends 'base.html' %}
 {% load static %}
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="{% static 'css/base.css' %}">
-    <link rel="stylesheet" href="{% static 'css/home.css' %}">
-    <title>Home</title>
-</head>
+{% block title %}Inicio - TurnioMed{% endblock %}
+{% block nav_home %}active{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+{% block page_title %}Inicio{% endblock %}
 
-<body>
-    <aside class="sidebar">
-        <div class="sidebar-logo">
-            <div class="logo-icon">
-                <img src="{% static 'img/logo.png' %}" alt="Logo">
+{% block content %}
+    <div class="welcome-banner">
+        <div class="welcome-text">
+            <h2>Bienvenid@, {{ usuario.nombre_completo }}</h2>
+            <p>{{ usuario.cargo_display }}</p>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon blue">
+                <i class="fa-solid fa-calendar-days"></i>
             </div>
-            <div class="logo-text">
-                <span>Gestión de Turnos Médicos</span>
-                <strong>TurnioMed</strong>
+            <div class="stat-body">
+                <div class="stat-label">Turnos de hoy</div>
+                <div class="stat-value">{{ turnos_hoy }}</div>
+                <div class="stat-sub">en el área</div>
+                <a href="#" class="stat-link">Ver detalle ></a>
             </div>
         </div>
 
-        <nav class="sidebar-nav">
-            <a href="{% url 'home' %}" class="nav-item active">
-                <i class="fa-solid fa-house"></i> Inicio
-            </a>
-            <a href="{% url 'turnos' %}" class="nav-item">
-                <i class="fa-solid fa-calendar-days"></i> Turnos
-            </a>
-            <a href="{% url 'solicitudes' %}" class="nav-item">
-                <i class="fa-solid fa-file-lines"></i> Solicitudes
-                <span class="nav-badge">8</span>
-            </a>
-            <a href="{% url 'vacaciones' %}" class="nav-item">
-                <i class="fa-solid fa-umbrella-beach"></i> Vacaciones
-            </a>
-            <a href="{% url 'reportes' %}" class="nav-item">
-                <i class="fa-solid fa-chart-line"></i> Reportes
-            </a>
-            <a href="#" class="nav-item">
-                <i class="fa-solid fa-gear"></i> Configuración
-            </a>
-            <a href="#" class="nav-item">
-                <i class="fa-regular fa-circle-question"></i> Ayuda
-            </a>
-        </nav>
-        <div class="sidebar-footer">
-            <div class="user-card" id="userCard">
-                <div class="user-dropdown" id="userDropdown">
-                    <a href="#" class="dropdown-item">
-                        <i class="fa-solid fa-user-doctor"></i> Perfil
-                    </a>
-                    <hr style="margin: 0; border: 0; border-top: 1px solid #eee;">
-                    <a href="{% url 'logout' %}" class="dropdown-item logout-text" style="color: #e74c3c !important;">
-                        <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión
-                    </a>
-                </div>
-
-                <div class="user-avatar">GQ</div>
-                <div class="user-info">
-                    <strong>{{ user.get_full_name|default:"Lic. Gianina Quispe" }}</strong>
-                    <span>{{ user.groups.all.0.name|default:"Jefe de Área" }}</span>
-                </div>
-                <i class="fa-solid fa-chevron-down"></i> </div>
-        </div>
-    </aside>
-
-    <main class="main">
-        <header class="topbar">
-            <div class="topbar-left">
-                <h1>Inicio</h1>
+        <div class="stat-card">
+            <div class="stat-icon green">
+                <i class="fa-regular fa-clock"></i>
             </div>
-            <div class="topbar-right">
-                <div class="notif-btn">
-                    <i class="fa-regular fa-bell"></i>
-                    <span class="notif-dot"></span>
-                </div>
-                <div class="topbar-date">
-                    <div class="date">Viernes, 24 de abril de 2026</div>
-                    <div class="time">12:30 PM</div>
-                </div>
-            </div>
-        </header>
-
-        <div class="content">
-            <div class="welcome-banner">
-                <div class="welcome-text">
-                    <h2>Bienvenida, Lic. Gianina Quispe</h2>
-                    <p>Jefe de Área - Hospitalización</p>
-                </div>
-                <div class="welcome-meta">
-                    <div class="wdate">Viernes, 24 de abril de 2026</div>
-                    <div class="wtime">12:30 PM</div>
-                </div>
-            </div>
-
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon blue">
-                        <i class="fa-solid fa-calendar-days"></i>
-                    </div>
-                    <div class="stat-body">
-                        <div class="stat-label">Turnos de hoy</div>
-                        <div class="stat-value">12</div>
-                        <div class="stat-sub">en el área</div>
-                        <a href="#" class="stat-link">Ver detalle ></a>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon green">
-                        <i class="fa-regular fa-clock"></i>
-                    </div>
-                    <div class="stat-body">
-                        <div class="stat-label">Horas acumuladas (mes)</div>
-                        <div class="stat-value">150<small style="font-size:14px;font-weight:500"> h</small></div>
-                        <div class="stat-sub"><span class="extra">+50 h extra</span></div>
-                        <a href="#" class="stat-link">Ver reporte ></a>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon amber">
-                        <i class="fa-solid fa-file-lines"></i>
-                    </div>
-                    <div class="stat-body">
-                        <div class="stat-label">Solicitudes pendientes</div>
-                        <div class="stat-value">5</div>
-                        <div class="stat-sub"><span class="warn">requieren revisión</span></div>
-                        <a href="#" class="stat-link">Revisar solicitudes ></a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="section-header">
-                <span class="section-title">Vista rápida de turnos</span>
-                <div class="section-controls">
-                    <select class="view-select">
-                        <option> Área de trabajo </option>
-                        <option>Sala 1A</option>
-                        <option>Sala 1B</option>
-                    </select>
-                    <select class="view-select">
-                        <option>Semana</option>
-                        <option>Día</option>
-                        <option>Mes</option>
-                    </select>
-                    <div class="week-nav">
-                        <button class="nav-arrow">
-                            <i class="fa-solid fa-chevron-left"></i>
-                        </button>
-                        <span>20 - 26 de abril, 2026</span>
-                        <button class="nav-arrow">
-                            <i class="fa-solid fa-chevron-right"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="schedule-card">
-                <table class="schedule-table">
-                    <thead>
-                        <tr>
-                            <th class="th-person">Personal médico</th>
-                            <th>LUN<span class="th-day">20</span></th>
-                            <th>MAR<span class="th-day">21</span></th>
-                            <th>MIÉ<span class="th-day">22</span></th>
-                            <th>JUE<span class="th-day">23</span></th>
-                            <th class="today-col">VIE<span class="th-day">24</span></th>
-                            <th>SÁB<span class="th-day">25</span></th>
-                            <th>DOM<span class="th-day">26</span></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td class="person-cell">
-                                <div class="person-info">
-                                    <div class="person-avatar">CN</div>
-                                    <div>
-                                        <div class="person-name">Ccoya Acuña, Nicole</div>
-                                        <div class="person-role">Lic. de enfermería</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td><span class="shift-tag shift-libre"><span class="sh-name">Libre</span></span></td>
-                            <td><span class="shift-tag shift-dia"><span class="sh-name">Día</span><span class="sh-time">07:00-19:00</span></span></td>
-                            <td><span class="shift-tag shift-noche"><span class="sh-name">Noche</span><span class="sh-time">19:00-07:00</span></span></td>
-                            <td><span class="shift-tag shift-libre"><span class="sh-name">Libre</span></span></td>
-                            <td><span class="shift-tag shift-libre"><span class="sh-name">Libre</span></span></td>
-                            <td><span class="shift-tag shift-libre"><span class="sh-name">Libre</span></span></td>
-                            <td><span class="shift-tag shift-dia"><span class="sh-name">Día</span><span class="sh-time">07:00-19:00</span></span></td>
-                        </tr>
-                        <tr>
-                            <td class="person-cell">
-                                <div class="person-info">
-                                    <div class="person-avatar">SV</div>
-                                    <div>
-                                        <div class="person-name">Salgado Ortiz, Vanesa</div>
-                                        <div class="person-role">Lic. de enfermería</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td><span class="shift-tag shift-mediodia"><span class="sh-name">Medio día</span><span class="sh-time">7:00-12:00</span></span></td>
-                            <td><span class="shift-tag shift-libre"><span class="sh-name">Libre</span></span></td>
-                            <td><span class="shift-tag shift-dia"><span class="sh-name">Día</span><span class="sh-time">07:00-19:00</span></span></td>
-                            <td><span class="shift-tag shift-noche"><span class="sh-name">Noche</span><span class="sh-time">19:00-07:00</span></span></td>
-                            <td><span class="shift-tag shift-libre"><span class="sh-name">Libre</span></span></td>
-                            <td><span class="shift-tag shift-libre"><span class="sh-name">Libre</span></span></td>
-                            <td><span class="shift-tag shift-libre"><span class="sh-name">Libre</span></span></td>
-                        </tr>
-
-                        <tr>
-                            <td class="person-cell">
-                                <div class="person-info">
-                                    <div class="person-avatar">MG</div>
-                                    <div>
-                                        <div class="person-name">Castro Damas, Sussan</div>
-                                        <div class="person-role">Tec. de enfermería</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td><span class="shift-tag shift-tarde"><span class="sh-name">Tarde</span><span class="sh-time">19:00-07:00</span></span></td>
-                            <td><span class="shift-tag shift-libre"><span class="sh-name">Libre</span></span></td>
-                            <td><span class="shift-tag shift-dia"><span class="sh-name">Día</span><span class="sh-time">7:00-19:00</span></span></td>
-                            <td><span class="shift-tag shift-noche"><span class="sh-name">Noche</span><span class="sh-time">19:00-07:00</span></span></td>
-                            <td><span class="shift-tag shift-libre"><span class="sh-name">Libre</span></span></td>
-                            <td><span class="shift-tag shift-libre"><span class="sh-name">Libre</span></span></td>
-                            <td><span class="shift-tag shift-libre"><span class="sh-name">Libre</span></span></td>
-                        </tr>
-                    </tbody>
-                </table>
-
-                <div class="legend">
-                    <div class="legend-item"><span class="legend-dot dia"></span><span>Día</span></div>
-                    <div class="legend-item"><span class="legend-dot mediodia"></span><span>Medio día</span></div>
-                    <div class="legend-item"><span class="legend-dot tarde"></span><span>Tarde</span></div>
-                    <div class="legend-item"><span class="legend-dot noche"></span><span>Noche</span></div>
-                    <div class="legend-item"><span class="legend-dot libre"></span><span>Libre / Vacaciones</span></div>
-                </div>
+            <div class="stat-body">
+                <div class="stat-label">Horas acumuladas (mes)</div>
+                <div class="stat-value">150<small style="font-size:14px;font-weight:500"> h</small></div>
+                <div class="stat-sub"><span class="extra">+50 h extra</span></div>
+                <a href="#" class="stat-link">Ver reporte ></a>
             </div>
         </div>
-        <footer class="page-footer">
-            <span>© 2026 Hospital de Emergencias Pediatricas - Gestión de Turnos Médicos</span>
-            <span>Versión 1.0.0</span>
-        </footer>
-    </main>
 
-<script>
-    // Seleccionamos los elementos por el ID que pusimos arriba
-    const userCard = document.getElementById('userCard');
-    const userDropdown = document.getElementById('userDropdown');
+        <div class="stat-card">
+            <div class="stat-icon amber">
+                <i class="fa-solid fa-file-lines"></i>
+            </div>
+            <div class="stat-body">
+                <div class="stat-label">Solicitudes pendientes</div>
+                <div class="stat-value">{{ total_pendientes }}</div>
+                <div class="stat-sub"><span class="warn">requieren revisión</span></div>
+                <a href="#" class="stat-link">Revisar solicitudes ></a>
+            </div>
+        </div>
+    </div>
 
-    // Al hacer clic en la tarjeta, alterna la clase 'show'
-    userCard.addEventListener('click', function(e) {
-        e.stopPropagation(); // Evita que el clic cierre el menú inmediatamente
-        userDropdown.classList.toggle('show');
-    });
+    <div class="section-header">
+        <span class="section-title">Vista rápida de turnos</span>
+        <div class="section-controls">
+            {% if usuario.es_jefe_departamento %}
+                <select class="view-select" onchange="window.location.href=this.value">
+                    <option value="{% url 'home' %}?area=all"
+                            {% if not area_id or area_id == 'all' %}selected{% endif %}>
+                        Todas las áreas
+                    </option>
 
-    // Si haces clic en cualquier otro lado de la página, cierra el menú
-    document.addEventListener('click', function() {
-        userDropdown.classList.remove('show');
-    });
-</script>
-</body>
-</html>
+                    {% for area in areas %}
+                        <option value="{% url 'home' %}?area={{ area.id }}"
+                                {% if area_id == area.id|stringformat:'s' %}selected{% endif %}>
+                            {{ area.nombre }}
+                        </option>
+                    {% endfor %}
+                </select>
+
+            {% elif usuario.es_jefe_area %}
+                <select class="view-select" onchange="window.location.href=this.value">
+                    <option value="{% url 'home' %}?sala=all"
+                            {% if not sala_id or sala_id == 'all' %}selected{% endif %}>
+                        Área completa
+                    </option>
+
+                    {% for sala in salas %}
+                        <option value="{% url 'home' %}?sala={{ sala.id }}"
+                                {% if sala_id == sala.id|stringformat:'s' %}selected{% endif %}>
+                            {{ sala.nombre }}
+                        </option>
+                    {% endfor %}
+                </select>
+            {% endif %}
+            <select class="view-select">
+                <option>Semana</option>
+                <option>Día</option>
+                <option>Mes</option>
+            </select>
+            <div class="week-nav">
+                <button class="nav-arrow"><i class="fa-solid fa-chevron-left"></i></button>
+                <span>20 - 26 de abril, 2026</span>
+                <button class="nav-arrow"><i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <div class="schedule-card">
+        <table class="schedule-table">
+            <thead>
+                <tr>
+                    <th class="th-person">Personal</th>
+                    {% for dia in dias_semana %}
+                        <th {% if dia == hoy %}class="today-col"{% endif %}>
+                            {{ dia|date:"D"|upper }}
+                            <span class="th-day">{{ dia|date:"d" }}</span>
+                        </th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for fila in filas %}
+                <tr>
+                    <td class="person-cell">
+                        <div class="person-info">
+                            <div class="person-avatar">
+                                {{ fila.persona.nombre|first|upper }}{{ fila.persona.apellidos|first|upper }}
+                            </div>
+                            <div>
+                                <div class="person-name">{{ fila.persona.apellidos }}, {{ fila.persona.nombre }}</div>
+                                <div class="person-role">{{ fila.persona.cargo_display }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    {% for turno in fila.turnos %}
+                    <td>
+                        {% if turno %}
+                            {% if turno.codigo == 'D4' or turno.codigo == 'D' %}
+                                <span class="shift-tag shift-dia">
+                            {% elif turno.codigo == 'M' %}
+                                <span class="shift-tag shift-mediodia">
+                            {% elif turno.codigo == 'T' %}
+                                <span class="shift-tag shift-tarde">
+                            {% else %}
+                                <span class="shift-tag shift-noche">
+                            {% endif %}
+                                <span class="sh-name">{{ turno.nombre }}</span>
+                                <span class="sh-time">{{ turno.hora_inicio }}–{{ turno.hora_fin }}</span>
+                            </span>
+                        {% else %}
+                            <span class="shift-tag shift-libre">
+                                <span class="sh-name">Libre</span>
+                            </span>
+                        {% endif %}
+                    </td>
+                    {% endfor %}
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="empty-table">No hay personal registrado en esta área.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="legend">
+            <div class="legend-item"><span class="legend-dot dia"></span><span>Día</span></div>
+            <div class="legend-item"><span class="legend-dot mediodia"></span><span>Medio día</span></div>
+            <div class="legend-item"><span class="legend-dot tarde"></span><span>Tarde</span></div>
+            <div class="legend-item"><span class="legend-dot noche"></span><span>Noche</span></div>
+            <div class="legend-item"><span class="legend-dot libre"></span><span>Libre / Vacaciones</span></div>
+        </div>
+    </div>
+{% endblock %}

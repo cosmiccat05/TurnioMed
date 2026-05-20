@@ -17,39 +17,28 @@
     --white: #ffffff;
     --green: #10b981;
     --yellow: #f59e0b;
-    --tag-dia-bg: #d3f8e0;
-    --tag-dia-text: #15803d;
-    --tag-mediodia-bg: #fee2e2;
-    --tag-mediodia-text: #b91c1c;
-    --tag-noche-bg: #dbeafe;
-    --tag-noche-text: #1d4ed8;
-    --tag-tarde-text:#b45309;
-    --tag-tarde-bg: #f9edbf;
-    --tag-libre-bg: #f3f4f6;
-    --tag-libre-text: #6b7280;
-    --vac-ocupado-bg:#7c3aed;
-    --vac-ocupado-text:#ffffff;
-    --vac-sel-bg:#c4b5fd;
-    --vac-sel-text:#4c1d95;
     --radius: 10px;
     --shadow: 0 1px 4px rgba(0,0,0,.08);
 }
 
 body {
-    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: var(--bg);
     color: var(--text-primary);
     display: flex;
     min-height: 100vh;
 }
 
+/* SIDEBAR */
 .sidebar {
     width: var(--sidebar-w);
     background: var(--navy);
     display: flex;
     flex-direction: column;
     position: fixed;
-    top: 0; left: 0; bottom: 0;
+    top: 0;
+    left: 0;
+    bottom: 0;
     z-index: 100;
 }
 
@@ -69,7 +58,6 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
     overflow: hidden;
 }
 
@@ -79,19 +67,14 @@ body {
     object-fit: contain;
 }
 
-.sidebar-logo .logo-text {
-    line-height: 1.2;
-}
-
-.sidebar-logo .logo-text span {
+.logo-text span {
     display: block;
     color: rgba(255,255,255,.55);
     font-size: 11px;
     font-weight: 500;
-    letter-spacing: .4px;
 }
 
-.sidebar-logo .logo-text strong {
+.logo-text strong {
     color: white;
     font-size: 13.5px;
     font-weight: 700;
@@ -115,7 +98,6 @@ body {
     color: rgba(255,255,255,.65);
     font-size: 13.5px;
     font-weight: 500;
-    cursor: pointer;
     text-decoration: none;
     transition: background .15s, color .15s;
     position: relative;
@@ -124,15 +106,19 @@ body {
 .nav-item i {
     font-size: 18px;
     width: 22px;
-    min-width: 22px;
     text-align: center;
-    display: inline-flex;
-    justify-content: center;
     color: inherit;
 }
 
-.nav-item:hover { background: rgba(255,255,255,.07); color: white; }
-.nav-item.active { background: var(--blue-accent); color: white; }
+.nav-item:hover {
+    background: rgba(255,255,255,.07);
+    color: white;
+}
+
+.nav-item.active {
+    background: var(--blue-accent);
+    color: white;
+}
 
 .nav-badge {
     margin-left: auto;
@@ -149,24 +135,29 @@ body {
     padding: 0 5px;
 }
 
+/* USER DROPDOWN */
 .sidebar-footer {
     padding: 12px;
     border-top: 1px solid rgba(255,255,255,.08);
 }
 
 .user-card {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 10px;
     padding: 8px 10px;
+    width: 100%;
     border-radius: 8px;
     cursor: pointer;
     transition: background .15s;
 }
 
-.user-card:hover { background: rgba(255,255,255,.07); }
+.user-card:hover {
+    background: rgba(255,255,255,.07);
+}
 
-.user-card i {
+.user-card > i {
     color: rgba(255,255,255,.5);
     font-size: 11px;
 }
@@ -185,7 +176,10 @@ body {
     flex-shrink: 0;
 }
 
-.user-info { flex: 1; overflow: hidden; }
+.user-info {
+    flex: 1;
+    overflow: hidden;
+}
 
 .user-info strong {
     display: block;
@@ -202,6 +196,57 @@ body {
     font-size: 11px;
 }
 
+.user-dropdown {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 0;
+    width: 210px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.18);
+    z-index: 9999;
+    overflow: hidden;
+}
+
+.user-dropdown.show {
+    display: block;
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 11px 14px;
+    color: var(--text-primary);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.dropdown-item i {
+    color: var(--text-secondary);
+    font-size: 13px;
+    width: 16px;
+}
+
+.dropdown-item:hover {
+    background: var(--bg);
+}
+
+.dropdown-item.logout-text,
+.dropdown-item.logout-text i {
+    color: #dc2626;
+}
+
+.user-dropdown hr {
+    margin: 0;
+    border: none;
+    border-top: 1px solid var(--border);
+}
+
+/* MAIN */
 .main {
     margin-left: var(--sidebar-w);
     flex: 1;
@@ -223,12 +268,30 @@ body {
     z-index: 50;
 }
 
-.topbar-left h1 { font-size: 20px; font-weight: 700; color: var(--text-primary); }
-.topbar-right { display: flex; align-items: center; gap: 16px; }
+.topbar-left h1 {
+    font-size: 20px;
+    font-weight: 700;
+}
 
-.topbar-date { text-align: right; }
-.topbar-date .date { font-size: 13px; font-weight: 600; color: var(--text-primary); }
-.topbar-date .time { font-size: 12px; color: var(--text-secondary); }
+.topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.topbar-date {
+    text-align: right;
+}
+
+.topbar-date .date {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.topbar-date .time {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
 
 .notif-btn {
     position: relative;
@@ -241,7 +304,6 @@ body {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: background .15s;
 }
 
 .notif-btn i {
@@ -249,21 +311,27 @@ body {
     color: var(--text-secondary);
 }
 
-.notif-btn:hover { background: var(--bg); }
-.notif-btn:hover i { color: var(--text-primary); }
+.notif-btn:hover {
+    background: var(--bg);
+}
 
 .notif-dot {
     position: absolute;
-    top: 5px; right: 5px;
-    width: 8px; height: 8px;
+    top: 5px;
+    right: 5px;
+    width: 8px;
+    height: 8px;
     background: #ef4444;
     border-radius: 50%;
     border: 2px solid white;
 }
 
-.content { padding: 28px 32px; flex: 1; }
+.content {
+    padding: 28px 32px;
+    flex: 1;
+}
 
-/* ── FOOTER ── */
+/* FOOTER */
 .page-footer {
     display: flex;
     justify-content: space-between;
@@ -276,6 +344,7 @@ body {
     margin-top: auto;
 }
 
+/* COMPONENTE REUTILIZABLE */
 .nav-arrow {
     width: 26px;
     height: 26px;
@@ -286,9 +355,13 @@ body {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: background .12s;
 }
 
-.nav-arrow i { font-size: 13px; color: var(--text-secondary); }
-.nav-arrow:hover { background: var(--bg); }
-.nav-arrow:hover i { color: var(--text-primary); }
+.nav-arrow i {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.nav-arrow:hover {
+    background: var(--bg);
+}

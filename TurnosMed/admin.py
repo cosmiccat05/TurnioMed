@@ -1,26 +1,25 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import (Usuario, Area, Sala, Turno, SolicitudCambioTurno, SolicitudVacaciones, SolicitudDescansoMedico, ProgramacionVacaciones, Notificacion)
+from .models import (Usuario, Departamento, Area, Sala, Turno, SolicitudCambioTurno, SolicitudVacaciones, SolicitudDescansoMedico, ProgramacionVacaciones, Notificacion)
 
 # USUARIO
 @admin.register(Usuario)
 class UsuarioAdmin(UserAdmin):
-    list_display = ('nombre_completo', 'dni', 'email', 'rol', 'get_condicion', 'area', 'is_active')
-    list_filter = ('rol', 'condicion', 'tipo_trabajador', 'area', 'is_active')
+    list_display = ('nombre_completo', 'dni', 'email', 'rol', 'get_condicion', 'departamento', 'area', 'is_active')
+    list_filter = ('rol', 'condicion', 'tipo_trabajador', 'departamento', 'area', 'is_active')
     search_fields = ('nombre', 'apellidos', 'dni', 'email')
     ordering = ('apellidos', 'nombre')
 
-    # Columna extra para mostrar condición con display bonito
     @admin.display(description='Condición')
     def get_condicion(self, obj):
         return obj.get_condicion_display() if obj.condicion else '—'
 
     fieldsets = (
         ('Datos personales', {
-            'fields': ('nombre', 'apellidos', 'dni', 'email', 'telefono')
+            'fields': ('nombre', 'apellidos', 'dni', 'email', 'fecha_nacimiento', 'telefono')
         }),
         ('Rol y ubicación', {
-            'fields': ('rol', 'tipo_trabajador', 'condicion', 'area', 'sala')
+            'fields': ('rol', 'tipo_trabajador', 'condicion', 'departamento', 'area', 'sala')
         }),
         ('Acceso al sistema', {
             'fields': ('password', 'is_active', 'is_staff', 'fecha_ingreso')
@@ -34,7 +33,7 @@ class UsuarioAdmin(UserAdmin):
     add_fieldsets = (
         ('Datos personales', {
             'classes': ('wide',),
-            'fields': ('nombre', 'apellidos', 'dni', 'email', 'telefono')
+            'fields': ('nombre', 'apellidos', 'dni', 'email', 'fecha_nacimiento', 'telefono')
         }),
         ('Rol y ubicación', {
             'classes': ('wide',),
@@ -53,12 +52,17 @@ class SalaInline(admin.TabularInline):
     fields = ('nombre', 'activa')
     show_change_link = True
 
-
-@admin.register(Area)
-class AreaAdmin(admin.ModelAdmin):
+@admin.register(Departamento)
+class DepartamentoAdmin(admin.ModelAdmin):
     list_display = ('nombre', 'tipo', 'activo')
     list_filter = ('tipo', 'activo')
     search_fields = ('nombre',)
+
+@admin.register(Area)
+class AreaAdmin(admin.ModelAdmin):
+    list_display = ('nombre', 'departamento', 'activo')
+    list_filter = ('departamento', 'activo')
+    search_fields = ('nombre', 'departamento__nombre')
     inlines = [SalaInline]
 
 

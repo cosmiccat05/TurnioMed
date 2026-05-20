@@ -1,3 +1,4 @@
+/*reportes.css*/
 /* ── LAYOUT PRINCIPAL ── */
 .rep-layout {
     display: grid;
@@ -451,19 +452,6 @@
 
 .cert.yes     { background: #dcfce7; color: #15803d; }
 .cert.pending { background: #fef3c7; color: #b45309; }
-
-/* ── FOOTER ── */
-.page-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 14px 32px;
-    border-top: 1px solid var(--border);
-    font-size: 12px;
-    color: var(--text-secondary);
-    background: var(--white);
-    margin-top: auto;
-}
 
 /* ── RESPONSIVE ── */
 @media (max-width: 1000px) {

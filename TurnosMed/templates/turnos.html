@@ -1,496 +1,310 @@
+{% extends 'base.html' %}
 {% load static %}
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="{% static 'css/base.css' %}">
-    <link rel="stylesheet" href="{% static 'css/turnos.css' %}">
-    <title>Gestión de Turnos - TurnosMed</title>
-</head>
-<body>
 
-    <aside class="sidebar">
-        <div class="sidebar-logo">
-            <div class="logo-icon">
-                <img src="../static/img/logo.png" alt="logo">
+{% block title %}Turnos - TurnioMed{% endblock %}
+{% block nav_turnos %}active{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/turnos.css' %}">
+{% endblock %}
+
+{% block page_title %}Programación de turnos{% endblock %}
+
+{% block content %}
+
+<div class="filters-bar">
+    <div class="filter-group">
+        <label>Sala de trabajo</label>
+        <div class="select-wrap">
+            <select onchange="window.location.href=this.value">
+                <option
+                    value="{% url 'turnos' %}?anio={{ anio }}&mes={{ mes }}&sala=all"
+                    {% if not sala_seleccionada %}selected{% endif %}> Todas las salas
+                </option>
+                {% for sala in salas %}
+                    <option
+                        value="{% url 'turnos' %}?anio={{ anio }}&mes={{ mes }}&sala={{ sala.id }}"
+                        {% if sala.id == sala_seleccionada.id %}selected{% endif %}>
+                        {{ sala.nombre }}
+                    </option>
+                {% endfor %}
+            </select>
+            <i class="fa-solid fa-chevron-down"></i>
+        </div>
+    </div>
+
+    <div class="filter-group">
+        <label>Mes</label>
+        <div class="month-nav">
+            <a class="nav-arrow"
+               href="{% url 'turnos' %}?anio={{ anio_anterior }}&mes={{ mes_anterior }}&sala={% if sala_seleccionada %}{{ sala_seleccionada.id }}{% else %}all{% endif %}">
+                <i class="fa-solid fa-chevron-left"></i>
+            </a>
+
+            <div class="month-display">
+                <i class="fa-regular fa-calendar"></i>
+                <span>{{ nombre_mes }} {{ anio }}</span>
             </div>
-            <div class="logo-text">
-                <span>Gestión de Turnos Médicos</span>
-                <strong>TurnioMed</strong>
+
+            <a class="nav-arrow"
+               href="{% url 'turnos' %}?anio={{ anio_siguiente }}&mes={{ mes_siguiente }}&sala={% if sala_seleccionada %}{{ sala_seleccionada.id }}{% else %}all{% endif %}">
+                <i class="fa-solid fa-chevron-right"></i>
+            </a>
+        </div>
+    </div>
+
+    <button class="btn-save" type="button">
+        <i class="fa-solid fa-floppy-disk"></i> Guardar programación
+    </button>
+</div>
+
+<div class="quick-tip">
+    <div class="tip-left">
+        <i class="fa-solid fa-circle-info tip-icon"></i>
+        <div>
+            <span class="tip-label">Ingreso rápido:</span>
+            Haz clic en cualquier celda y escribe el código del turno directamente.
+            <br>
+            Códigos permitidos:
+            <strong>D, D4, N, N4, T, M</strong>.
+            También puedes usar <strong>Ctrl + click</strong> para seleccionar varias celdas.
+        </div>
+    </div>
+
+    <div class="tip-right">
+        <a class="btn-excel">
+            <i class="fa-solid fa-file-arrow-down"></i> Importar Excel
+        </a>
+
+        <a class="btn-excel">
+            <i class="fa-solid fa-file-arrow-down"></i> Exportar Excel
+        </a>
+    </div>
+</div>
+
+<div class="schedule-layout">
+
+    <div class="schedule-left">
+        <div class="schedule-card">
+            <div class="table-scroll">
+                <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th class="th-month" colspan="{{ dias_mes|length|add:1 }}">
+                                {{ nombre_mes }} {{ anio }}
+                            </th>
+                        </tr>
+
+                        <tr>
+                            <th class="th-person">Personal asistencial</th>
+
+                            {% for dia in dias_mes %}
+                                <th class="{% if dia.es_fin_semana %}weekend{% endif %} {% if dia.es_domingo %}holiday{% endif %}">
+                                    {{ dia.nombre_dia }}
+                                    <span class="th-day">{{ dia.numero|stringformat:"02d" }}</span>
+                                </th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for fila in filas %}
+                            <tr data-row="{{ fila.index }}">
+                                <td class="person-cell">
+                                    <div class="person-info">
+                                        <div class="person-avatar">
+                                            {{ fila.persona.nombre|first|upper }}{{ fila.persona.apellidos|first|upper }}
+                                        </div>
+
+                                        <div>
+                                            <div class="person-name">
+                                                {{ fila.persona.apellidos }}, {{ fila.persona.nombre }}
+                                            </div>
+                                            <div class="person-role">
+                                                {{ fila.persona.cargo_display }} - {{ fila.persona.get_condicion_display }}
+                                            </div>
+                                        </div>
+
+                                        <button class="row-menu" type="button">
+                                            <i class="fa-solid fa-ellipsis-vertical"></i>
+                                        </button>
+                                    </div>
+                                </td>
+
+                                {% for celda in fila.celdas %}
+                                    <td class="editable-cell {% if celda.es_fin_semana %}weekend{% endif %} {% if celda.es_domingo %}holiday{% endif %}"
+                                        data-trabajador-id="{{ fila.persona.id }}"
+                                        data-fecha="{{ celda.fecha|date:'Y-m-d' }}"
+                                        data-code="{{ celda.codigo }}">
+
+                                        {% if celda.codigo == 'D' or celda.codigo == 'D4'%}
+                                            <span class="shift-cell d">D</span>
+                                        {% elif celda.codigo == 'T' %}
+                                            <span class="shift-cell t">T</span>
+                                        {% elif celda.codigo == 'M' %}
+                                            <span class="shift-cell m">M</span>
+                                        {% elif celda.codigo == 'N' or celda.codigo == 'N4'%}
+                                            <span class="shift-cell n">N</span>
+                                        {% else %}
+                                            <span class="shift-cell empty"></span>
+                                        {% endif %}
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="{{ dias_mes|length|add:1 }}" class="empty-table">
+                                    No hay personal asistencial registrado en esta área.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="legend-bar">
+                <span class="legend-title">Leyenda:</span>
+                <div class="legend-item">
+                    <span class="shift-cell d">D</span> Día 12h
+                </div>
+                <div class="legend-item">
+                    <span class="shift-cell d">D4</span> Día 12.5h
+                </div>
+                <div class="legend-item">
+                    <span class="shift-cell t">T</span> Tarde 6h
+                </div>
+                <div class="legend-item">
+                    <span class="shift-cell m">M</span> Medio día 6h
+                </div>
+                <div class="legend-item">
+                    <span class="shift-cell n">N</span> Noche 12h
+                </div>
+                <div class="legend-item">
+                    <span class="shift-cell n">N4</span> Noche 12.5h
+                </div>
             </div>
         </div>
-        <nav class="sidebar-nav">
-            <a href="{% url 'home' %}" class="nav-item">
-                <i class="fa-solid fa-house"></i> Inicio
-            </a>
-            <a href="{% url 'turnos' %}" class="nav-item active">
-                <i class="fa-solid fa-calendar-days"></i> Turnos
-            </a>
-            <a href="{% url 'solicitudes' %}" class="nav-item">
-                <i class="fa-solid fa-file-lines"></i> Solicitudes
-                <span class="nav-badge">8</span>
-            </a>
-            <a href="{% url 'vacaciones' %}" class="nav-item">
-                <i class="fa-solid fa-umbrella-beach"></i> Vacaciones
-            </a>
-            <a href="{% url 'reportes' %}" class="nav-item">
-                <i class="fa-solid fa-chart-line"></i> Reportes
-            </a>
-            <a href="#" class="nav-item">
-                <i class="fa-solid fa-gear"></i> Configuración
-            </a>
-            <a href="#" class="nav-item">
-                <i class="fa-regular fa-circle-question"></i> Ayuda
-            </a>
-        </nav>
-        <div class="sidebar-footer">
-            <div class="user-card">
-                <div class="user-avatar">GQ</div>
-                <div class="user-info">
-                    <strong>Lic. Gianina Quispe</strong>
-                    <span>Jefe de Área</span>
+
+        <div class="tips-below">
+            <div class="tips-below-title">
+                <i class="fa-solid fa-lightbulb"></i> Consejos
+            </div>
+            <ul class="tips-list">
+                <li>Haz clic en una celda y escribe directamente D, D4, N, N4, T o M.</li>
+                <li>Usa <kbd>Ctrl</kbd> + click para seleccionar varias celdas.</li>
+                <li>Usa las flechas para moverte entre celdas.</li>
+                <li>Usa <kbd>Delete</kbd> o <kbd>Backspace</kbd> para limpiar celdas.</li>
+                <li>Presiona el botón Guardar programación para registrar los cambios.</li>
+            </ul>
+        </div>
+    </div>
+
+    <aside class="detail-panel">
+        <div class="panel-section">
+            <div class="panel-title">Detalle del turno seleccionado</div>
+
+            <div class="detail-doctor">
+                <div class="person-avatar">--</div>
+                <div>
+                    <div class="person-name">Seleccione una celda</div>
+                    <div class="person-role">Personal asistencial</div>
                 </div>
-                <i class="fa-solid fa-chevron-down"></i>
+            </div>
+
+            <div class="detail-shift">
+                <span class="shift-cell empty"></span>
+                <div class="detail-shift-info">
+                    <strong>Sin turno</strong>
+                    <span>Seleccione una celda</span>
+                </div>
+            </div>
+
+            <div class="detail-date">
+                <i class="fa-regular fa-calendar"></i>
+                Fecha no seleccionada
+            </div>
+        </div>
+
+        <div class="panel-section">
+            <div class="panel-title">Acciones rápidas</div>
+
+            <div class="quick-actions">
+                <button class="action-btn" type="button">
+                    <i class="fa-solid fa-eraser"></i> Limpiar celda
+                </button>
+                <button class="action-btn" type="button">
+                    <i class="fa-regular fa-copy"></i> Copiar fila
+                </button>
+                <button class="action-btn" type="button">
+                    <i class="fa-regular fa-clipboard"></i> Pegar en fila
+                </button>
+                <button class="action-btn" type="button">
+                    <i class="fa-solid fa-table-cells"></i> Copiar programación
+                </button>
+            </div>
+        </div>
+
+        <div class="panel-section">
+            <div class="panel-title">Conteo de turnos</div>
+
+            <div class="shift-count-grid">
+                <div class="shift-count-item">
+                    <span class="shift-cell d">D</span>
+                    <div class="count-info">
+                        <span class="count-label">Día</span>
+                        <span class="count-val" id="count-d">0</span>
+                    </div>
+                </div>
+
+                <div class="shift-count-item">
+                    <span class="shift-cell n">N</span>
+                    <div class="count-info">
+                        <span class="count-label">Noche</span>
+                        <span class="count-val" id="count-n">0</span>
+                    </div>
+                </div>
+
+                <div class="shift-count-item">
+                    <span class="shift-cell m">M</span>
+                    <div class="count-info">
+                        <span class="count-label">Medio día</span>
+                        <span class="count-val" id="count-m">0</span>
+                    </div>
+                </div>
+
+                <div class="shift-count-item">
+                    <span class="shift-cell t">T</span>
+                    <div class="count-info">
+                        <span class="count-label">Tarde</span>
+                        <span class="count-val" id="count-t">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hours-summary">
+                <div class="hours-row">
+                    <span>Horas programadas</span>
+                    <strong id="hours-total">0 h</strong>
+                </div>
+
+                <div class="hours-bar-wrap">
+                    <div class="hours-bar">
+                        <div class="hours-bar-fill" id="hours-bar-fill"></div>
+                    </div>
+                    <span class="hours-meta" id="hours-meta">0 / 150 h requeridas</span>
+                </div>
+
+                <div class="hours-status warn" id="hours-status">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    Faltan 150 h para completar el mes
+                </div>
             </div>
         </div>
     </aside>
+</div>
 
-    <main class="main">
-        <header class="topbar">
-            <div class="topbar-left">
-                <h1>Programación de turnos</h1>
-            </div>
-            <div class="topbar-right">
-                <div class="notif-btn">
-                    <i class="fa-regular fa-bell"></i>
-                    <span class="notif-dot"></span>
-                </div>
-                <div class="topbar-date">
-                    <div class="date">Viernes, 24 de abril de 2026</div>
-                    <div class="time">12:30 PM</div>
-                </div>
-            </div>
-        </header>
+{% endblock %}
 
-        <div class="content">
-
-            <!-- FILTROS -->
-            <div class="filters-bar">
-                <div class="filter-group">
-                    <label>Área de trabajo</label>
-                    <div class="select-wrap">
-                        <select>
-                            <option>Sala 1A</option>
-                            <option>Sala 1B</option>
-                            <option>Sala 1C</option>
-                            <option>Sala 2C</option>
-                        </select>
-                        <i class="fa-solid fa-chevron-down"></i>
-                    </div>
-                </div>
-
-                <div class="filter-group">
-                    <label>Mes</label>
-                    <div class="month-nav">
-                        <button class="nav-arrow"><i class="fa-solid fa-chevron-left"></i></button>
-                        <div class="month-display">
-                            <i class="fa-regular fa-calendar"></i>
-                            <span>Abril 2026</span>
-                        </div>
-                        <button class="nav-arrow"><i class="fa-solid fa-chevron-right"></i></button>
-                    </div>
-                </div>
-
-                <div class="filter-group">
-                    <label>Vista</label>
-                    <div class="view-toggle">
-                        <button class="view-btn active">Mensual</button>
-                        <button class="view-btn">Semanal</button>
-                        <button class="view-btn">Listado</button>
-                    </div>
-                </div>
-
-                <div class="filter-group">
-                    <label>Plantilla</label>
-                    <div class="select-wrap">
-                        <select>
-                            <option>Seleccionar plantilla</option>
-                            <option>Plantilla Abril</option>
-                        </select>
-                        <i class="fa-solid fa-chevron-down"></i>
-                    </div>
-                </div>
-
-                <button class="btn-save">
-                    <i class="fa-solid fa-floppy-disk"></i> Guardar programación
-                </button>
-            </div>
-
-            <!-- AVISO INGRESO RÁPIDO -->
-            <div class="quick-tip">
-                <div class="tip-left">
-                    <i class="fa-solid fa-circle-info tip-icon"></i>
-                    <div>
-                        <span class="tip-label">Ingreso rápido:</span>
-                        Haz clic en cualquier celda y escribe el código del turno directamente.
-                        <br>Solo se permiten los siguientes códigos: <strong>D, T, M, N</strong>
-                    </div>
-                </div>
-                <div class="tip-right">
-                    <div class="tip-excel-text">
-                        <strong>Copiar / Pegar desde Excel</strong>
-                        <span>Puedes copiar un rango de Excel<br>y pegarlo directamente en la tabla.</span>
-                    </div>
-                    <button class="btn-excel">
-                        <i class="fa-regular fa-paste"></i> Pegar desde Excel
-                    </button>
-                </div>
-            </div>
-
-            <div class="schedule-layout">
-
-                <div class="schedule-left">
-                    <div class="schedule-card">
-                        <div class="table-scroll">
-                            <table class="schedule-table">
-                                <thead>
-                                    <tr>
-                                        <th class="th-month" colspan="12">Abril 2026</th>
-                                    </tr>
-                                    <tr>
-                                        <th class="th-person">Personal asistencial</th>
-                                        <th>Mié<span class="th-day">01</span></th>
-                                        <th>Jue<span class="th-day">02</span></th>
-                                        <th>Vie<span class="th-day">03</span></th>
-                                        <th class="weekend">Sáb<span class="th-day">04</span></th>
-                                        <th class="weekend holiday">Dom<span class="th-day">05</span></th>
-                                        <th>Lun<span class="th-day">06</span></th>
-                                        <th>Mar<span class="th-day">07</span></th>
-                                        <th>Mié<span class="th-day">08</span></th>
-                                        <th>Jue<span class="th-day">09</span></th>
-                                        <th>Vie<span class="th-day">10</span></th>
-                                        <th class="th-more">···</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr data-row="0">
-                                        <td class="person-cell">
-                                            <div class="person-info">
-                                                <div class="person-avatar">CN</div>
-                                                <div>
-                                                    <div class="person-name">Ccoya Acuña, Nicole</div>
-                                                    <div class="person-role">Lic. enfermería</div>
-                                                </div>
-                                                <button class="row-menu"><i class="fa-solid fa-ellipsis-vertical"></i></button>
-                                            </div>
-                                        </td>
-                                        <td class="editable-cell" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="editable-cell" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="editable-cell" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="editable-cell weekend" data-code="D"><span class="shift-cell d">D</span></td>
-                                        <td class="editable-cell weekend holiday" data-code="N"><span class="shift-cell n">N</span></td>
-                                        <td class="editable-cell" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="editable-cell" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="editable-cell" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="editable-cell" data-code="D"><span class="shift-cell d">D</span></td>
-                                        <td class="editable-cell" data-code="N"><span class="shift-cell n">N</span></td>
-                                        <td class="td-more"></td>
-                                    </tr>
-                                    <tr data-row="1">
-                                        <td class="person-cell">
-                                            <div class="person-info">
-                                                <div class="person-avatar">AM</div>
-                                                <div>
-                                                    <div class="person-name">Almeyda Almeyda, Marlene</div>
-                                                    <div class="person-role">Lic. enfermería</div>
-                                                </div>
-                                                <button class="row-menu"><i class="fa-solid fa-ellipsis-vertical"></i></button>
-                                            </div>
-                                        </td>
-                                        <td class="editable-cell" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="editable-cell" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="editable-cell" data-code="D"><span class="shift-cell d">D</span></td>
-                                        <td class="editable-cell weekend" data-code="N"><span class="shift-cell n">N</span></td>
-                                        <td class="editable-cell weekend holiday" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="editable-cell" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="editable-cell" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="editable-cell" data-code="D"><span class="shift-cell d">D</span></td>
-                                        <td class="editable-cell" data-code="N"><span class="shift-cell n">N</span></td>
-                                        <td class="editable-cell" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="td-more"></td>
-                                    </tr>
-                                    <tr data-row="1">
-                                        <td class="person-cell">
-                                            <div class="person-info">
-                                                <div class="person-avatar">SV</div>
-                                                <div>
-                                                    <div class="person-name">Salgado Ortiz, Vanesa</div>
-                                                    <div class="person-role">Lic. enfermería</div>
-                                                </div>
-                                                <button class="row-menu"><i class="fa-solid fa-ellipsis-vertical"></i></button>
-                                            </div>
-                                        </td>
-                                        <td class="editable-cell" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="editable-cell" data-code="D"><span class="shift-cell d">D</span></td>
-                                        <td class="editable-cell" data-code="N"><span class="shift-cell n">N</span></td>
-                                        <td class="editable-cell weekend" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="editable-cell weekend holiday" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="editable-cell" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="editable-cell" data-code="D"><span class="shift-cell d">D</span></td>
-                                        <td class="editable-cell" data-code="N"><span class="shift-cell n">N</span></td>
-                                        <td class="editable-cell" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="editable-cell" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="td-more"></td>
-                                    </tr>
-                                    <tr data-row="1">
-                                        <td class="person-cell">
-                                            <div class="person-info">
-                                                <div class="person-avatar">LM</div>
-                                                <div>
-                                                    <div class="person-name">Loza Apaza, Maritza</div>
-                                                    <div class="person-role">Lic. enfermería</div>
-                                                </div>
-                                                <button class="row-menu"><i class="fa-solid fa-ellipsis-vertical"></i></button>
-                                            </div>
-                                        </td>
-                                        <td class="editable-cell" data-code="D"><span class="shift-cell d">D</span></td>
-                                        <td class="editable-cell" data-code="N"><span class="shift-cell n">N</span></td>
-                                        <td class="editable-cell" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="editable-cell weekend" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="editable-cell weekend holiday" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="editable-cell" data-code="D"><span class="shift-cell d">D</span></td>
-                                        <td class="editable-cell" data-code="N"><span class="shift-cell n">N</span></td>
-                                        <td class="editable-cell" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="editable-cell" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="editable-cell" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="td-more"></td>
-                                    </tr>
-                                    <tr data-row="1">
-                                        <td class="person-cell">
-                                            <div class="person-info">
-                                                <div class="person-avatar">VA</div>
-                                                <div>
-                                                    <div class="person-name">Vallejos Culqui, Aleida</div>
-                                                    <div class="person-role">Lic. enfermería</div>
-                                                </div>
-                                                <button class="row-menu"><i class="fa-solid fa-ellipsis-vertical"></i></button>
-                                            </div>
-                                        </td>
-                                        <td class="editable-cell" data-code="N"><span class="shift-cell n">N</span></td>
-                                        <td class="editable-cell" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="editable-cell" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="editable-cell weekend" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="editable-cell weekend holiday" data-code="D"><span class="shift-cell d">D</span></td>
-                                        <td class="editable-cell" data-code="N"><span class="shift-cell n">N</span></td>
-                                        <td class="editable-cell" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="editable-cell" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="editable-cell" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="editable-cell" data-code="D"><span class="shift-cell d">D</span></td>
-                                        <td class="td-more"></td>
-                                    </tr>
-                                    <tr data-row="2">
-                                        <td class="person-cell">
-                                            <div class="person-info">
-                                                <div class="person-avatar">PJ</div>
-                                                <div>
-                                                    <div class="person-name">Peralta Jihuaña, Janet</div>
-                                                    <div class="person-role">Lic. enfermería</div>
-                                                </div>
-                                                <button class="row-menu"><i class="fa-solid fa-ellipsis-vertical"></i></button>
-                                            </div>
-                                        </td>
-                                        <td class="editable-cell" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="editable-cell" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="editable-cell" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="editable-cell weekend" data-code="D"><span class="shift-cell d">D</span></td>
-                                        <td class="editable-cell weekend holiday" data-code="N"><span class="shift-cell n">N</span></td>
-                                        <td class="editable-cell" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="editable-cell" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="editable-cell" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="editable-cell" data-code="D"><span class="shift-cell d">D</span></td>
-                                        <td class="editable-cell" data-code="N"><span class="shift-cell n">N</span></td>
-                                        <td class="td-more"></td>
-                                    </tr>
-                                    <tr data-row="3">
-                                        <td class="person-cell">
-                                            <div class="person-info">
-                                                <div class="person-avatar">CE</div>
-                                                <div>
-                                                    <div class="person-name">Chayan Mesta, Erika</div>
-                                                    <div class="person-role">Tec. de enfermería</div>
-                                                </div>
-                                                <button class="row-menu"><i class="fa-solid fa-ellipsis-vertical"></i></button>
-                                            </div>
-                                        </td>
-                                        <td class="editable-cell" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="editable-cell" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="editable-cell" data-code="D"><span class="shift-cell d">D</span></td>
-                                        <td class="editable-cell weekend" data-code="N"><span class="shift-cell n">N</span></td>
-                                        <td class="editable-cell weekend holiday" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="editable-cell" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="editable-cell" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="editable-cell" data-code="D"><span class="shift-cell d">D</span></td>
-                                        <td class="editable-cell" data-code="N"><span class="shift-cell n">N</span></td>
-                                        <td class="editable-cell" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="td-more"></td>
-                                    </tr>
-                                    <tr data-row="4">
-                                        <td class="person-cell">
-                                            <div class="person-info">
-                                                <div class="person-avatar">EG</div>
-                                                <div>
-                                                    <div class="person-name">Enriquez Leon, Giovanna</div>
-                                                    <div class="person-role">Tec. de enfermería</div>
-                                                </div>
-                                                <button class="row-menu"><i class="fa-solid fa-ellipsis-vertical"></i></button>
-                                            </div>
-                                        </td>
-                                        <td class="editable-cell" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="editable-cell" data-code="D"><span class="shift-cell d">D</span></td>
-                                        <td class="editable-cell" data-code="N"><span class="shift-cell n">N</span></td>
-                                        <td class="editable-cell weekend" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="editable-cell weekend holiday" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="editable-cell" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="editable-cell" data-code="D"><span class="shift-cell d">D</span></td>
-                                        <td class="editable-cell" data-code="N"><span class="shift-cell n">N</span></td>
-                                        <td class="editable-cell" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="editable-cell" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="td-more"></td>
-                                    </tr>
-                                    <tr data-row="5">
-                                        <td class="person-cell">
-                                            <div class="person-info">
-                                                <div class="person-avatar">CS</div>
-                                                <div>
-                                                    <div class="person-name">Castro Damas, Sussan</div>
-                                                    <div class="person-role">Tec. de enfermería</div>
-                                                </div>
-                                                <button class="row-menu"><i class="fa-solid fa-ellipsis-vertical"></i></button>
-                                            </div>
-                                        </td>
-                                        <td class="editable-cell" data-code="D"><span class="shift-cell d">D</span></td>
-                                        <td class="editable-cell" data-code="N"><span class="shift-cell n">N</span></td>
-                                        <td class="editable-cell" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="editable-cell weekend" data-code="T"><span class="shift-cell empty"></span></td>
-                                        <td class="editable-cell weekend holiday" data-code="D"><span class="shift-cell empty"></span></td>
-                                        <td class="editable-cell" data-code="D"><span class="shift-cell d">D</span></td>
-                                        <td class="editable-cell" data-code="N"><span class="shift-cell n">N</span></td>
-                                        <td class="editable-cell" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="editable-cell" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="editable-cell" data-code=""><span class="shift-cell empty"></span></td>
-                                        <td class="td-more"></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <!-- LEYENDA COMPACTA -->
-                        <div class="legend-bar">
-                            <span class="legend-title">Leyenda:</span>
-                            <div class="legend-item"><span class="shift-cell d">D</span> Día (07:00-19:00)</div>
-                            <div class="legend-item"><span class="shift-cell t">T</span> Tarde (12:00-19:00)</div>
-                            <div class="legend-item"><span class="shift-cell m">M</span> Medio día (07:00-13:00)</div>
-                            <div class="legend-item"><span class="shift-cell n">N</span> Noche (19:00-07:00)</div>
-                        </div>
-                    </div>
-
-                    <!-- CONSEJOS — justo debajo de la tabla -->
-                    <div class="tips-below">
-                        <div class="tips-below-title">
-                            <i class="fa-solid fa-lightbulb"></i> Consejos
-                        </div>
-                        <ul class="tips-list">
-                            <li>Haz clic en una celda y escribe el código directamente (D, T, M, N).</li>
-                            <li>Presiona <kbd>Enter</kbd> o <kbd>Tab</kbd> para confirmar el ingreso.</li>
-                            <li>Usa el pegado masivo desde Excel para mayor rapidez en la carga.</li>
-                            <li>Los días en rojo corresponden a fines de semana o festivos.</li>
-                        </ul>
-                    </div>
-
-                </div><!-- /schedule-left -->
-
-                <!-- PANEL DERECHO -->
-                <aside class="detail-panel">
-                    <div class="panel-section">
-                        <div class="panel-title">Detalle del turno seleccionado</div>
-                        <div class="detail-doctor">
-                            <div class="person-avatar">JR</div>
-                            <div>
-                                <div class="person-name">Ccoya Acuña, Nicole</div>
-                                <div class="person-role">Lic. de enfermería</div>
-                            </div>
-                        </div>
-                        <div class="detail-shift">
-                            <span class="shift-cell d">D</span>
-                            <div class="detail-shift-info">
-                                <strong>Día</strong>
-                                <span>07:00 - 19:00</span>
-                            </div>
-                        </div>
-                        <div class="detail-date">
-                            <i class="fa-regular fa-calendar"></i>
-                            Mar, 07 de abril de 2026
-                        </div>
-                    </div>
-
-                    <div class="panel-section">
-                        <div class="panel-title">Acciones rápidas</div>
-                        <div class="quick-actions">
-                            <button class="action-btn"><i class="fa-solid fa-eraser"></i> Limpiar celda</button>
-                            <button class="action-btn"><i class="fa-regular fa-copy"></i> Copiar fila</button>
-                            <button class="action-btn"><i class="fa-regular fa-clipboard"></i> Pegar en fila</button>
-                            <button class="action-btn"><i class="fa-solid fa-table-cells"></i> Copiar programación</button>
-                        </div>
-                    </div>
-
-                    <div class="panel-section">
-                        <div class="panel-title" style="margin-top:10px">Conteo de turnos</div>
-                        <div class="shift-count-grid">
-                            <div class="shift-count-item">
-                                <span class="shift-cell d">D</span>
-                                <div class="count-info"><span class="count-label">Día</span><span class="count-val" id="count-d">0</span></div>
-                            </div>
-                            <div class="shift-count-item">
-                                <span class="shift-cell n">N</span>
-                                <div class="count-info"><span class="count-label">Noche</span><span class="count-val" id="count-n">0</span></div>
-                            </div>
-                            <div class="shift-count-item">
-                                <span class="shift-cell m">M</span>
-                                <div class="count-info"><span class="count-label">Medio día</span><span class="count-val" id="count-m">0</span></div>
-                            </div>
-                            <div class="shift-count-item">
-                                <span class="shift-cell t">T</span>
-                                <div class="count-info"><span class="count-label">Tarde</span><span class="count-val" id="count-t">0</span></div>
-                            </div>
-                        </div>
-
-                        <div class="hours-summary">
-                            <div class="hours-row">
-                                <span>Horas programadas</span>
-                                <strong id="hours-total">0 h</strong>
-                            </div>
-                            <div class="hours-bar-wrap">
-                                <div class="hours-bar">
-                                    <div class="hours-bar-fill" id="hours-bar-fill"></div>
-                                </div>
-                                <span class="hours-meta" id="hours-meta">0 / 150 h requeridas</span>
-                            </div>
-                            <div class="hours-status warn" id="hours-status">
-                                <i class="fa-solid fa-triangle-exclamation"></i> Faltan 150 h para completar el mes
-                            </div>
-                        </div>
-
-                        <button class="btn-report">Ver reporte de validaciones</button>
-                    </div>
-                </aside>
-            </div>
-        </div>
-
-        <footer class="page-footer">
-            <span>© 2026 Hospital de Emergencias Pediátricas – Gestión de Turnos Médicos</span>
-            <span>Versión 1.0.0</span>
-        </footer>
-    </main>
+{% block extra_js %}
 <script src="{% static 'js/turnos.js' %}"></script>
-</body>
-</html>
+{% endblock %}
