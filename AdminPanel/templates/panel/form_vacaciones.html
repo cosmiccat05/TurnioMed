@@ -1,0 +1,52 @@
+{% extends 'panel/base.html' %}
+{% load static %}
+
+{% block title %}{% if es_edicion %}Editar{% else %}Programar{% endif %} vacaciones - Panel Administrativo{% endblock %}
+{% block nav_vacaciones %}active{% endblock %}
+{% block breadcrumb %}Vacaciones{% endblock %}
+{% block page_title %}{% if es_edicion %}Editar vacaciones{% else %}Nueva programacion de vacaciones{% endif %}{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'panel/css/vacaciones.css' %}">{% endblock %}
+{% block page_actions %}<a class="btn btn-ghost btn-sm" href="{% url 'admin_vacaciones' %}"><i class="fa-solid fa-arrow-left"></i> Volver</a>{% endblock %}
+
+{% block content %}
+<form method="post" class="card vacation-form">
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+    <div class="alert alert-error">{{ form.non_field_errors }}</div>
+    {% endif %}
+    <div class="vac-form-grid">
+        <div class="field-group">
+            <label for="{{ form.trabajador.id_for_label }}">Trabajador</label>
+            {{ form.trabajador }}
+            {% if form.trabajador.errors %}<span class="field-error-text">{{ form.trabajador.errors.0 }}</span>{% endif %}
+        </div>
+        <div class="field-group">
+            <label for="{{ form.anio.id_for_label }}">Año</label>
+            {{ form.anio }}
+            {% if form.anio.errors %}<span class="field-error-text">{{ form.anio.errors.0 }}</span>{% endif %}
+        </div>
+        <div class="field-group">
+            <label for="{{ form.fecha_inicio.id_for_label }}">Fecha de inicio</label>
+            {{ form.fecha_inicio }}
+            {% if form.fecha_inicio.errors %}<span class="field-error-text">{{ form.fecha_inicio.errors.0 }}</span>{% endif %}
+        </div>
+        <div class="field-group">
+            <label for="{{ form.fecha_fin.id_for_label }}">Fecha final</label>
+            {{ form.fecha_fin }}
+            {% if form.fecha_fin.errors %}<span class="field-error-text">{{ form.fecha_fin.errors.0 }}</span>{% endif %}
+        </div>
+        <div class="field-group full">
+            <label for="{{ form.observaciones.id_for_label }}">Observaciones</label>
+            {{ form.observaciones }}
+            {% if form.observaciones.errors %}<span class="field-error-text">{{ form.observaciones.errors.0 }}</span>{% endif %}
+        </div>
+    </div>
+    <div class="vac-note">
+        Al guardar, cualquier turno existente dentro del periodo sera retirado de la programacion.
+    </div>
+    <div class="form-actions">
+        <a class="btn btn-ghost" href="{% url 'admin_vacaciones' %}">Cancelar</a>
+        <button type="submit" class="btn btn-primary">Guardar programacion</button>
+    </div>
+</form>
+{% endblock %}
