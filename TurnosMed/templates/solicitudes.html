@@ -1,326 +1,99 @@
+<!-- TurnosMed solicitudes -->
+{% extends 'base.html' %}
 {% load static %}
-<html lang="es">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Solicitudes - Gestión de Turnos Médicos</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="{% static 'css/base.css' %}">
-    <link rel="stylesheet" href="{% static 'css/solicitudes.css' %}">
-</head>
-<body>
+{% block title %}Solicitudes - TurnioMed{% endblock %}
+{% block nav_solicitudes %}active{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/solicitudes.css' %}">
+<link rel="stylesheet" href="{% static 'css/detalles_solicitudes.css' %}">
+{% endblock %}
+{% block page_title %}Solicitudes{% endblock %}
 
-    <aside class="sidebar">
-        <div class="sidebar-logo">
-            <div class="logo-icon">
-                <img src="../static/img/logo.png" alt="logo">
-            </div>
-            <div class="logo-text">
-                <span>Gestión de Turnos Médicos</span>
-                <strong>TurnioMed</strong>
-            </div>
+{% block content %}
+<div class="sol-layout">
+
+    <div class="sol-left">
+
+        <!-- Tabs -->
+        <div class="sol-tabs">
+            <button class="sol-tab {% if estado_actual == 'entrada' %}active{% endif %}"
+                    onclick="location.href='{% url 'solicitudes' %}?estado=entrada'">
+                Bandeja de entrada <span class="tab-badge">{{ total_pendientes }}</span>
+            </button>
+
+            <button class="sol-tab {% if estado_actual == 'aprobado' %}active{% endif %}"
+                    onclick="location.href='{% url 'solicitudes' %}?estado=aprobado'">
+                Aprobadas
+            </button>
+
+            <button class="sol-tab {% if estado_actual == 'rechazado' %}active{% endif %}"
+                    onclick="location.href='{% url 'solicitudes' %}?estado=rechazado'">
+                Rechazadas
+            </button>
         </div>
-        <nav class="sidebar-nav">
-            <a href="{% url 'home' %}" class="nav-item">
-                <i class="fa-solid fa-house"></i> Inicio
-            </a>
-            <a href="{% url 'turnos' %}" class="nav-item">
-                <i class="fa-solid fa-calendar-days"></i> Turnos
-            </a>
-            <a href="{% url 'solicitudes' %}" class="nav-item active">
-                <i class="fa-solid fa-file-lines"></i> Solicitudes
-                <span class="nav-badge">8</span>
-            </a>
-            <a href="{% url 'vacaciones' %}" class="nav-item">
-                <i class="fa-solid fa-umbrella-beach"></i> Vacaciones
-            </a>
-            <a href="#" class="nav-item">
-                <i class="fa-solid fa-chart-line"></i> Reportes
-            </a>
-            <a href="{% url 'reportes' %}" class="nav-item">
-                <i class="fa-solid fa-gear"></i> Configuración
-            </a>
-            <a href="#" class="nav-item">
-                <i class="fa-regular fa-circle-question"></i> Ayuda
-            </a>
-        </nav>
-        <div class="sidebar-footer">
-            <div class="user-card">
-                <div class="user-avatar">GQ</div>
-                <div class="user-info">
-                    <strong>Lic. Gianina Quispe</strong>
-                    <span>Jefe de Área</span>
-                </div>
+
+        <!-- Buscador + Filtros -->
+        <div class="sol-search-bar">
+            <div class="search-wrap">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="searchInput" placeholder="Buscar solicitud...">
+            </div>
+            <button class="btn-filter">
+                <i class="fa-solid fa-sliders"></i> Filtros
                 <i class="fa-solid fa-chevron-down"></i>
-            </div>
+            </button>
         </div>
-    </aside>
 
-    <main class="main">
-        <header class="topbar">
-            <div class="topbar-left">
-                <h1>Solicitudes</h1>
-            </div>
-            <div class="topbar-right">
-                <div class="notif-btn">
-                    <i class="fa-regular fa-bell"></i>
-                    <span class="notif-dot"></span>
-                </div>
-                <div class="topbar-date">
-                    <div class="date">Viernes, 24 de abril de 2026</div>
-                    <div class="time">12:30 PM</div>
-                </div>
-            </div>
-        </header>
+        <div class="sol-list" id="sol-list">
 
-        <div class="sol-layout">
-            <div class="sol-left">
-                <div class="sol-tabs">
-                    <button class="sol-tab active" data-tab="entrada">
-                        Bandeja de entrada <span class="tab-badge">8</span>
-                    </button>
-                    <button class="sol-tab" data-tab="aprobadas">Aprobadas</button>
-                    <button class="sol-tab" data-tab="rechazadas">Rechazadas</button>
-                    <button class="sol-tab" data-tab="todas">Todas</button>
-                </div>
-                <div class="sol-search-bar">
-                    <div class="search-wrap">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                        <input type="text" placeholder="Buscar solicitud...">
-                    </div>
-                    <button class="btn-filter">
-                        <i class="fa-solid fa-sliders"></i> Filtros
-                        <i class="fa-solid fa-chevron-down"></i>
-                    </button>
-                </div>
+            {% for solicitud in solicitudes_lista %}
+                <div class="sol-item"
+                     data-id="{{ solicitud.id }}"
+                     data-tipo="{{ solicitud.tipo_url }}">
+                    <div class="sol-avatar">{{ solicitud.solicitante_iniciales }}</div>
 
-                <div class="sol-list" id="sol-list">
-                    <div class="sol-item active" data-id="1">
-                        <div class="sol-avatar">CN</div>
-                        <div class="sol-info">
-                            <span class="sol-type">Cambio de turno</span>
-                            <span class="sol-name">Ccoya Acuña, Nicole</span>
-                            <span class="detail-specialty">Lic. de enfermería</span>
-                        </div>
-                        <div class="sol-meta">
-                            <span class="sol-date">24 abr, 2026<br>09:45 AM</span>
-                            <span class="sol-status pending">● Pendiente</span>
-                        </div>
+                    <div class="sol-info">
+                        <span class="sol-type">{{ solicitud.tipo_label }}</span>
+                        <span class="sol-name">{{ solicitud.solicitante_nombre }}</span>
+                        <span class="sol-role">{{ solicitud.cargo_display }}</span>
                     </div>
 
-                    <div class="sol-item" data-id="2">
-                        <div class="sol-avatar">SV</div>
-                        <div class="sol-info">
-                            <span class="sol-type">Descanso médico</span>
-                            <span class="sol-name">Salgado Ortiz, Vanesa</span>
-                            <small>Lic. de enfermería</small>
-                        </div>
-                        <div class="sol-meta">
-                            <span class="sol-date">24 abr, 2026<br>09:20 AM</span>
-                            <span class="sol-status pending">● Pendiente</span>
-                        </div>
-                    </div>
-
-                    <div class="sol-item" data-id="3">
-                        <div class="sol-avatar">LM</div>
-                        <div class="sol-info">
-                            <span class="sol-type">Adelanto de vacaciones</span>
-                            <span class="sol-name">Loza Apaza, Maritza</span>
-                            <span class="detail-specialty">Lic. de enfermería</span>
-                        </div>
-                        <div class="sol-meta">
-                            <span class="sol-date">24 abr, 2026<br>08:50 AM</span>
-                            <span class="sol-status pending">● Pendiente</span>
-                        </div>
-                    </div>
-
-                    <div class="sol-item" data-id="4">
-                        <div class="sol-avatar">VC</div>
-                        <div class="sol-info">
-                            <span class="sol-type">Cambio de turno</span>
-                            <span class="sol-name">Vallejos Culqui, Aleida</span>
-                            <span class="detail-specialty">Lic. de enfermería</span>
-                        </div>
-                        <div class="sol-meta">
-                            <span class="sol-date">23 abr, 2026<br>04:30 PM</span>
-                            <span class="sol-status pending">● Pendiente</span>
-                        </div>
-                    </div>
-
-                    <div class="sol-item" data-id="5">
-                        <div class="sol-avatar">PJ</div>
-                        <div class="sol-info">
-                            <span class="sol-type">Descanso médico</span>
-                            <span class="sol-name">Peralta Jihuaña, Janet</span>
-                            <span class="detail-specialty">Lic. de enfermería</span>
-                        </div>
-                        <div class="sol-meta">
-                            <span class="sol-date">23 abr, 2026<br>03:10 PM</span>
-                            <span class="sol-status pending">● Pendiente</span>
-                        </div>
-                    </div>
-
-                    <div class="sol-item" data-id="6">
-                        <div class="sol-avatar">CE</div>
-                        <div class="sol-info">
-                            <span class="sol-type">Cambio de vacaciones</span>
-                            <span class="sol-name">Chayan Mesta, Erika</span>
-                            <small>Tec. de enfermería</small>
-                        </div>
-                        <div class="sol-meta">
-                            <span class="sol-date">23 abr, 2026<br>11:00 AM</span>
-                            <span class="sol-status pending">● Pendiente</span>
-                        </div>
-                    </div>
-
-                    <div class="sol-item" data-id="7">
-                        <div class="sol-avatar">EL</div>
-                        <div class="sol-info">
-                            <span class="sol-type">Cambio de turno</span>
-                            <span class="sol-name">Enriquez Leon, Giovanna</span>
-                            <small>Tec. de enfermería</small>
-                        </div>
-                        <div class="sol-meta">
-                            <span class="sol-date">22 abr, 2026<br>06:15 PM</span>
-                            <span class="sol-status pending">● Pendiente</span>
-                        </div>
-                    </div>
-
-                    <div class="sol-item" data-id="8">
-                        <div class="sol-avatar">CD</div>
-                        <div class="sol-info">
-                            <span class="sol-type">Adelanto de vacaciones</span>
-                            <span class="sol-name">Castro Damas, Sussan</span>
-                            <small>Tec. de enfermería</small>
-                        </div>
-                        <div class="sol-meta">
-                            <span class="sol-date">22 abr, 2026<br>02:40 PM</span>
-                            <span class="sol-status pending">● Pendiente</span>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-
-            <div class="sol-right" id="sol-detail">
-
-                <div class="detail-back">
-                    <i class="fa-solid fa-arrow-left"></i> Volver a la lista
-                </div>
-
-                <div class="detail-header">
-                    <div class="detail-avatar">CN</div>
-                    <div class="detail-header-info">
-                        <h2>Solicitud de cambio de turno</h2>
-                        <span>Ccoya Acuña, Nicole</span>
-                        <span class="detail-specialty">Lic. de enfermería</span>
-                    </div>
-                    <div class="detail-header-right">
-                        <span class="badge-status pending">Pendiente</span>
-                        <span class="detail-submitted">Solicitado el<br>24 abr, 2026 - 09:45 AM</span>
+                    <div class="sol-meta">
+                        <span class="sol-date">
+                            {{ solicitud.fecha_solicitud|date:"d M, Y" }}<br>
+                            {{ solicitud.fecha_solicitud|date:"h:i A" }}
+                        </span>
+                        <span class="sol-status {{ solicitud.estado }}">
+                            ● {{ solicitud.estado_display }}
+                        </span>
                     </div>
                 </div>
-                <div class="detail-body">
-
-                    <div class="detail-col">
-                        <div class="detail-col-title">Detalles de la solicitud</div>
-
-                        <div class="detail-block">
-                            <div class="detail-block-label">
-                                <i class="fa-regular fa-calendar"></i> Turno actual (del solicitante)
-                            </div>
-                            <div class="shift-detail-row">
-                                <span class="shift-pill dia">Día</span>
-                                <div class="shift-detail-info">
-                                    <strong>Domingo, 26 abril 2026</strong>
-                                    <span>07:00 - 19:00</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="detail-block">
-                            <div class="detail-block-label">
-                                <i class="fa-solid fa-arrow-right-arrow-left"></i> Turno solicitado (del compañero)
-                            </div>
-                            <div class="shift-detail-row">
-                                <span class="shift-pill dia">Día</span>
-                                <div class="shift-detail-info">
-                                    <strong>Martes, 28 abril 2026</strong>
-                                    <span>13:00 - 19:00</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="detail-col">
-                        <div class="detail-col-title">Compañero con el que desea cambiar</div>
-
-                        <div class="companion-card">
-                            <div class="sol-avatar">AM</div>
-                            <div>
-                                <strong>Almeyda Almeyda, Marlene</strong>
-                                <span class="detail-specialty">Lic. de enfermería</span>
-                            </div>
-                        </div>
-
-                        <div class="detail-block">
-                            <div class="detail-block-label">
-                                <i class="fa-regular fa-calendar"></i> Turno actual (del compañero)
-                            </div>
-                            <div class="shift-detail-row">
-                                <span class="shift-pill dia">Día</span>
-                                <div class="shift-detail-info">
-                                    <strong>Martes, 28 abril 2026</strong>
-                                    <span>13:00 - 19:00</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="detail-block">
-                            <div class="detail-block-label">
-                                <i class="fa-solid fa-arrow-right-arrow-left"></i> Turno solicitado (del solicitante)
-                            </div>
-                            <div class="shift-detail-row">
-                                <span class="shift-pill dia">Día</span>
-                                <div class="shift-detail-info">
-                                    <strong>Domingo, 26 abril 2026</strong>
-                                    <span>07:00 - 19:00</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="detail-col">
-                        <div class="detail-col-title">Motivo de la solicitud</div>
-                        <p class="detail-reason">
-                            Tengo un compromiso personal en la mañana del domingo y la Lic. Marlene Almeyda puede cubrir mi turno completo sin inconvenientes.
-                        </p>
-                    </div>
-
+            {% empty %}
+                <div class="sol-empty-list">
+                    No hay solicitudes para mostrar.
                 </div>
+            {% endfor %}
 
-                <div class="detail-actions">
-                    <button class="btn-reject">
-                        <i class="fa-solid fa-xmark"></i> Rechazar
-                    </button>
-                    <button class="btn-accept">
-                        <i class="fa-solid fa-check"></i> Aceptar
-                    </button>
-                    <button class="btn-more">
-                        <i class="fa-solid fa-ellipsis"></i>
-                    </button>
-                </div>
-            </div>
         </div>
-    </main>
+    </div>
 
-<script>
-    document.querySelectorAll('.sol-item').forEach(item => {
-        item.addEventListener('click', () => {
-            document.querySelectorAll('.sol-item').forEach(i => i.classList.remove('active'));
-            item.classList.add('active');
-        });
-    });
-</script>
-</body>
-</html>
+    <div class="sol-right" id="sol-detail">
+
+        <div class="sol-empty" id="sol-empty">
+            <div class="sol-empty-icon">
+                <i class="fa-regular fa-envelope-open"></i>
+            </div>
+            <p class="sol-empty-title">Selecciona una solicitud</p>
+            <p class="sol-empty-sub">Elige un elemento de la lista para ver su detalle</p>
+        </div>
+
+        <!-- Contenedor donde se inyecta el detalle-->
+        <div class="sol-detail-content" id="sol-detail-content" style="display:none;"></div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/solicitudes.js' %}"></script>
+{% endblock %}

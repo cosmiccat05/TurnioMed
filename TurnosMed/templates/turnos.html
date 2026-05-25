@@ -14,6 +14,25 @@
 
 <div class="filters-bar">
     <div class="filter-group">
+        {% if usuario.es_jefe_departamento %}
+        <label>Area de trabajo</label>
+        <div class="select-wrap">
+            <select onchange="window.location.href=this.value">
+                <option
+                    value="{% url 'turnos' %}?anio={{ anio }}&mes={{ mes }}&area=all"
+                    {% if not area_seleccionada %}selected{% endif %}> Todas las areas
+                </option>
+                {% for area in areas %}
+                    <option
+                        value="{% url 'turnos' %}?anio={{ anio }}&mes={{ mes }}&area={{ area.id }}"
+                        {% if area.id == area_seleccionada.id %}selected{% endif %}>
+                        {{ area.nombre }}
+                    </option>
+                {% endfor %}
+            </select>
+            <i class="fa-solid fa-chevron-down"></i>
+        </div>
+        {% else %}
         <label>Sala de trabajo</label>
         <div class="select-wrap">
             <select onchange="window.location.href=this.value">
@@ -31,13 +50,14 @@
             </select>
             <i class="fa-solid fa-chevron-down"></i>
         </div>
+        {% endif %}
     </div>
 
     <div class="filter-group">
         <label>Mes</label>
         <div class="month-nav">
             <a class="nav-arrow"
-               href="{% url 'turnos' %}?anio={{ anio_anterior }}&mes={{ mes_anterior }}&sala={% if sala_seleccionada %}{{ sala_seleccionada.id }}{% else %}all{% endif %}">
+               href="{% url 'turnos' %}?anio={{ anio_anterior }}&mes={{ mes_anterior }}&{% if usuario.es_jefe_departamento %}area={% if area_seleccionada %}{{ area_seleccionada.id }}{% else %}all{% endif %}{% else %}sala={% if sala_seleccionada %}{{ sala_seleccionada.id }}{% else %}all{% endif %}{% endif %}">
                 <i class="fa-solid fa-chevron-left"></i>
             </a>
 
@@ -47,7 +67,7 @@
             </div>
 
             <a class="nav-arrow"
-               href="{% url 'turnos' %}?anio={{ anio_siguiente }}&mes={{ mes_siguiente }}&sala={% if sala_seleccionada %}{{ sala_seleccionada.id }}{% else %}all{% endif %}">
+               href="{% url 'turnos' %}?anio={{ anio_siguiente }}&mes={{ mes_siguiente }}&{% if usuario.es_jefe_departamento %}area={% if area_seleccionada %}{{ area_seleccionada.id }}{% else %}all{% endif %}{% else %}sala={% if sala_seleccionada %}{{ sala_seleccionada.id }}{% else %}all{% endif %}{% endif %}">
                 <i class="fa-solid fa-chevron-right"></i>
             </a>
         </div>
@@ -56,6 +76,9 @@
     <button class="btn-save" type="button">
         <i class="fa-solid fa-floppy-disk"></i> Guardar programación
     </button>
+
+    <div id="toast-container"></div>
+
 </div>
 
 <div class="quick-tip">
@@ -109,7 +132,11 @@
 
                     <tbody>
                         {% for fila in filas %}
-                            <tr data-row="{{ fila.index }}">
+                            <tr data-row="{{ fila.index }}"
+                                data-iniciales="{{ fila.persona.nombre|first|upper }}{{ fila.persona.apellidos|first|upper }}"
+                                data-nombre="{{ fila.persona.apellidos }}, {{ fila.persona.nombre }}"
+                                data-tipo="{{ fila.persona.get_tipo_trabajador_display }}"
+                                data-condicion="{{ fila.persona.get_condicion_display }}">
                                 <td class="person-cell">
                                     <div class="person-info">
                                         <div class="person-avatar">
@@ -132,19 +159,25 @@
                                 </td>
 
                                 {% for celda in fila.celdas %}
-                                    <td class="editable-cell {% if celda.es_fin_semana %}weekend{% endif %} {% if celda.es_domingo %}holiday{% endif %}"
+                                    <td class="editable-cell {% if celda.bloqueo %}blocked{% endif %} {% if celda.es_fin_semana %}weekend{% endif %} {% if celda.es_domingo %}holiday{% endif %}"
                                         data-trabajador-id="{{ fila.persona.id }}"
                                         data-fecha="{{ celda.fecha|date:'Y-m-d' }}"
-                                        data-code="{{ celda.codigo }}">
+                                        data-code="{{ celda.codigo }}"
+                                        data-bloqueo="{{ celda.bloqueo }}"
+                                        {% if celda.bloqueo %}title="Dia libre: {{ celda.bloqueo }}"{% endif %}>
 
                                         {% if celda.codigo == 'D' or celda.codigo == 'D4'%}
-                                            <span class="shift-cell d">D</span>
+                                            <span class="shift-cell d">{{ celda.codigo }}</span>
                                         {% elif celda.codigo == 'T' %}
-                                            <span class="shift-cell t">T</span>
+                                            <span class="shift-cell t">{{ celda.codigo }}</span>
                                         {% elif celda.codigo == 'M' %}
-                                            <span class="shift-cell m">M</span>
+                                            <span class="shift-cell m">{{ celda.codigo }}</span>
                                         {% elif celda.codigo == 'N' or celda.codigo == 'N4'%}
-                                            <span class="shift-cell n">N</span>
+                                            <span class="shift-cell n">{{ celda.codigo }}</span>
+                                        {% elif celda.bloqueo %}
+                                            <span class="shift-cell blocked" title="{{ celda.bloqueo }}">
+                                                <i class="fa-solid fa-lock"></i>
+                                            </span>
                                         {% else %}
                                             <span class="shift-cell empty"></span>
                                         {% endif %}
@@ -192,6 +225,7 @@
             <ul class="tips-list">
                 <li>Haz clic en una celda y escribe directamente D, D4, N, N4, T o M.</li>
                 <li>Usa <kbd>Ctrl</kbd> + click para seleccionar varias celdas.</li>
+                <li>Las celdas con candado estan bloqueadas por vacaciones, descanso medico o cumpleanos.</li>
                 <li>Usa las flechas para moverte entre celdas.</li>
                 <li>Usa <kbd>Delete</kbd> o <kbd>Backspace</kbd> para limpiar celdas.</li>
                 <li>Presiona el botón Guardar programación para registrar los cambios.</li>
@@ -283,21 +317,11 @@
 
             <div class="hours-summary">
                 <div class="hours-row">
-                    <span>Horas programadas</span>
+                    <span>Horas programadas en el mes</span>
                     <strong id="hours-total">0 h</strong>
                 </div>
 
-                <div class="hours-bar-wrap">
-                    <div class="hours-bar">
-                        <div class="hours-bar-fill" id="hours-bar-fill"></div>
-                    </div>
-                    <span class="hours-meta" id="hours-meta">0 / 150 h requeridas</span>
-                </div>
-
-                <div class="hours-status warn" id="hours-status">
-                    <i class="fa-solid fa-triangle-exclamation"></i>
-                    Faltan 150 h para completar el mes
-                </div>
+                <span class="hours-meta" id="hours-meta">Segun programacion vigente</span>
             </div>
         </div>
     </aside>

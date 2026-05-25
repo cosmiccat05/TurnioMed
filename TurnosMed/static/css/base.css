@@ -9,7 +9,8 @@
     --navy-light: #1e3a72;
     --blue-accent: #2563eb;
     --blue-hover: #164bbc;
-    --sidebar-w: 240px;
+    --sidebar-w: 248px;
+    --topbar-h: 60px;
     --text-primary: #111827;
     --text-secondary: #6b7280;
     --border: #e5e7eb;
@@ -157,9 +158,16 @@ body {
     background: rgba(255,255,255,.07);
 }
 
-.user-card > i {
+.user-chevron {
     color: rgba(255,255,255,.5);
     font-size: 11px;
+    flex-shrink: 0;
+    transition: transform .15s;
+}
+
+.user-card.open .user-chevron,
+.user-card:has(.user-dropdown.show) .user-chevron {
+    transform: rotate(180deg);
 }
 
 .user-avatar {
@@ -259,7 +267,9 @@ body {
     background: var(--white);
     border-bottom: 1px solid var(--border);
     padding: 0 32px;
-    height: 60px;
+    height: var(--topbar-h);
+    min-height: var(--topbar-h);
+    flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: space-between;

@@ -1,0 +1,90 @@
+/*solicitudes*/
+.request-toolbar {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.request-search {
+    flex: 1;
+    min-width: 230px;
+}
+
+.request-tabs {
+    display: flex;
+    border: 1px solid var(--border);
+    background: var(--white);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+}
+
+.request-tabs a {
+    padding: 9px 14px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    border-right: 1px solid var(--border);
+}
+
+.request-tabs a:last-child { border-right: 0; }
+.request-tabs a.active { background: var(--accent-light); color: var(--accent); font-weight: 700; }
+.request-list { overflow: hidden; }
+.cell-sub { display: block; color: var(--text-secondary); font-size: 12px; margin-top: 3px; }
+
+.request-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 60px 20px;
+    color: var(--text-secondary);
+}
+
+.request-empty i { font-size: 34px; color: var(--border-strong); }
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: minmax(420px, 1.45fr) minmax(300px, .85fr);
+    gap: 20px;
+    align-items: start;
+}
+
+.detail-card, .process-card { padding: 24px; }
+.detail-head { display: flex; align-items: center; gap: 14px; margin-bottom: 26px; }
+.detail-head h2 { font-size: 18px; margin-bottom: 4px; }
+.detail-head p { color: var(--text-secondary); font-size: 13px; }
+.detail-head .badge { margin-left: auto; }
+
+.request-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: var(--accent-light);
+    color: var(--accent);
+    text-transform: uppercase;
+    font-weight: 700;
+}
+
+.request-data {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-bottom: 22px;
+}
+
+.request-data dt { font-size: 12px; color: var(--text-secondary); margin-bottom: 5px; }
+.request-data dd { font-size: 14px; font-weight: 600; }
+.reason-box { background: var(--bg); border-radius: var(--radius); padding: 16px; }
+.reason-box p { margin-top: 8px; color: var(--text-secondary); font-size: 13px; line-height: 1.5; }
+.process-card h3 { margin-bottom: 12px; font-size: 16px; }
+.process-card p { color: var(--text-secondary); font-size: 13px; line-height: 1.5; margin-bottom: 18px; }
+.process-card label { display: block; font-size: 12.5px; font-weight: 600; margin-bottom: 6px; }
+.decision-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; }
+
+@media (max-width: 980px) {
+    .detail-grid { grid-template-columns: 1fr; }
+}

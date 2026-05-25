@@ -1,4 +1,3 @@
-/*home.css*/
 .welcome-banner {
     background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
     border-radius: var(--radius);
@@ -212,28 +211,39 @@
     color: var(--text-secondary);
 }
 
-.shift-dia  {
-    background: var(--tag-dia-bg);
-    color: var(--tag-dia-text);
+/* ── COLORES DE TURNO ── */
+/* Día / Día completo  →  verde (igual que shift-cell.d en turnos.css) */
+.shift-dia {
+    background: #d3f8e0;
+    color: #15803d;
 }
+
+/* Medio día  →  rojo suave */
 .shift-mediodia {
-    background: var(--tag-mediodia-bg);
-    color: var(--tag-mediodia-text);
+    background: #fee2e2;
+    color: #b91c1c;
 }
+
+/* Tarde  →  ámbar */
 .shift-tarde {
-    background: var(--tag-tarde-bg);
-    color: var(--tag-tarde-text);
+    background: #f9edbf;
+    color: #b45309;
 }
+
+/* Noche / Noche completa  →  azul (igual que shift-cell.n en turnos.css) */
 .shift-noche {
-    background: var(--tag-noche-bg);
-    color: var(--tag-noche-text);
+    background: #dbeafe;
+    color: #1d4ed8;
 }
+
+/* Libre  →  gris neutro */
 .shift-libre {
-    background: var(--tag-libre-bg);
-    color: var(--tag-libre-text);
+    background: transparent;
+    color: var(--text-secondary);
     font-style: italic;
 }
 
+/* ── LEYENDA ── */
 .legend {
     display: flex;
     align-items: center;
@@ -245,9 +255,9 @@
 
 .legend-item { display: flex; align-items: center; gap: 6px; }
 .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
-.legend-dot.dia  { background: #10b981; }
-.legend-dot.mediodia { background: #ef4444; }
-.legend-dot.tarde  { background: #f59e0b; }
-.legend-dot.noche  { background: #1d4ed8; }
+.legend-dot.dia      { background: #15803d; }
+.legend-dot.mediodia { background: #b91c1c; }
+.legend-dot.tarde    { background: #b45309; }
+.legend-dot.noche    { background: #1d4ed8; }
 .legend-dot.libre    { background: #d1d5db; }
 .legend-item span { font-size: 11.5px; color: var(--text-secondary); font-weight: 500; }

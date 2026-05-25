@@ -5,6 +5,7 @@
 from .auth import landing, signin, signout
 from .home import home
 from .turnos import turnos
-from .solicitudes import solicitudes
+from .solicitudes import (solicitudes, detalle_cambio_turno, detalle_vacaciones,
+                          detalle_descanso_medico, revisar_solicitud)
 from .vacaciones import vacaciones
 from .reportes import reportes

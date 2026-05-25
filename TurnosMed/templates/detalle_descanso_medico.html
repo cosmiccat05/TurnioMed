@@ -1,0 +1,112 @@
+{% load static %}
+<!-- Volver -->
+<a href="{% url 'solicitudes' %}" class="detail-back">
+    <i class="fa-solid fa-arrow-left"></i> Volver a la lista
+</a>
+
+<!-- Header -->
+<div class="detail-header">
+    <div class="detail-avatar dm-avatar">{{ solicitante_iniciales }}</div>
+    <div class="detail-header-info">
+        <h2>Solicitud de descanso médico</h2>
+        <span>{{ sol.solicitante.apellidos }}, {{ sol.solicitante.nombre }}</span>
+        <span class="detail-specialty">{{ sol.solicitante.cargo_display }}</span>
+    </div>
+    <div class="detail-header-right">
+        <span class="badge-status {{ sol.estado }}">{{ sol.get_estado_display }}</span>
+        <span class="detail-submitted">
+            Solicitado el<br>
+            {{ sol.fecha_solicitud|date:"d M, Y - h:i A" }}
+        </span>
+    </div>
+</div>
+
+<!-- Cuerpo: 2 columnas -->
+<div class="detail-body cols-2">
+
+    <!-- Col 1: Detalles -->
+    <div class="detail-col">
+        <div class="detail-col-title">Detalles del descanso médico</div>
+
+        <!-- Periodo -->
+        <div class="detail-block">
+            <div class="detail-block-label">
+                <i class="fa-regular fa-calendar-check"></i>
+                Periodo de descanso
+            </div>
+            <div class="detail-period-row">
+                <span class="period-dot {% if sol.estado == 'aprobado_jefe' or sol.estado == 'procesado' %}approved{% endif %}"></span>
+                <div>
+                    <div class="period-label">Período</div>
+                    <div class="period-dates">
+                        Desde {{ sol.fecha_inicio|date:"d/m/Y" }}
+                        {% if sol.fecha_fin %}
+                            hasta {{ sol.fecha_fin|date:"d/m/Y" }}
+                        {% else %}
+                            <span style="color:var(--text-secondary); font-weight:400">(en curso)</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grid días / tipo -->
+        <div class="dm-info-grid">
+            <div class="dm-info-card">
+                <span class="dm-info-label">Días solicitados</span>
+                <span class="dm-info-value highlight">
+                    {% if dias_totales %}{{ dias_totales }} días{% else %}En curso{% endif %}
+                </span>
+            </div>
+            <div class="dm-info-card">
+                <span class="dm-info-label">Estado</span>
+                <span class="dm-info-value">
+                    {% if en_curso %}En curso{% else %}Finalizado{% endif %}
+                </span>
+            </div>
+        </div>
+
+        <!-- Documento adjunto (placeholder — adaptar si se agrega FileField al modelo) -->
+        <div class="detail-block">
+            <div class="detail-block-label">
+                <i class="fa-regular fa-file-lines"></i>
+                Documento de respaldo
+            </div>
+            <div class="doc-attachment no-doc">
+                <div class="doc-icon muted">
+                    <i class="fa-regular fa-file"></i>
+                </div>
+                <div class="doc-info">
+                    <span class="doc-name muted">Sin documento adjunto</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Col 2: Motivo -->
+    <div class="detail-col">
+        <div class="detail-col-title">Motivo de la solicitud</div>
+        <p class="detail-reason">{{ sol.motivo }}</p>
+    </div>
+
+</div>
+
+<!-- Acciones -->
+<div class="detail-actions">
+    {% if sol.estado == 'pendiente' %}
+    <button class="btn-reject"
+            onclick="accionSolicitud('rechazar', 'descanso-medico', {{ sol.id }})">
+        <i class="fa-solid fa-xmark"></i> Rechazar
+    </button>
+    <button class="btn-accept"
+            onclick="accionSolicitud('aprobar', 'descanso-medico', {{ sol.id }})">
+        <i class="fa-solid fa-check"></i> Aceptar
+    </button>
+
+    {% else %}
+    <span class="badge-status {{ sol.estado }}" style="font-size:13px; padding:8px 16px">
+        {{ sol.get_estado_display }}
+        {% if sol.revisado_por %} - {{ sol.revisado_por.nombre }} {{ sol.revisado_por.apellidos }}{% endif %}
+    </span>
+    {% endif %}
+</div>

@@ -1,0 +1,41 @@
+{% extends 'panel/base.html' %}
+{% load static %}
+{% block title %}Adelanto de vacaciones - Panel Administrativo{% endblock %}
+{% block nav_solicitudes %}active{% endblock %}
+{% block breadcrumb %}Detalle de solicitud{% endblock %}
+{% block page_title %}Adelanto de vacaciones{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'panel/css/solicitudes.css' %}">{% endblock %}
+{% block page_actions %}<a href="{% url 'admin_solicitudes' %}" class="btn btn-ghost btn-sm"><i class="fa-solid fa-arrow-left"></i> Volver</a>{% endblock %}
+{% block content %}
+<div class="detail-grid">
+    <section class="card detail-card">
+        <div class="detail-head">
+            <div class="request-avatar">{{ sol.solicitante.nombre|first }}{{ sol.solicitante.apellidos|first }}</div>
+            <div><h2>{{ sol.solicitante.nombre_completo }}</h2><p>{{ sol.solicitante.cargo_display }}</p></div>
+            <span class="badge {% if sol.estado == 'aprobado_jefe' %}badge-warning{% elif sol.estado == 'procesado' %}badge-success{% else %}badge-danger{% endif %}">{{ sol.get_estado_display }}</span>
+        </div>
+        <dl class="request-data">
+            <div><dt>Periodo solicitado</dt><dd>{{ sol.fecha_inicio|date:"d/m/Y" }} - {{ sol.fecha_fin|date:"d/m/Y" }}</dd></div>
+            <div><dt>Dias solicitados</dt><dd>{{ sol.dias_totales }} dias</dd></div>
+            <div><dt>Aprobado inicialmente por</dt><dd>{% if sol.revisado_por %}{{ sol.revisado_por.nombre_completo }}{% else %}-{% endif %}</dd></div>
+            <div><dt>Fecha de solicitud</dt><dd>{{ sol.fecha_solicitud|date:"d/m/Y H:i" }}</dd></div>
+        </dl>
+        <div class="reason-box"><strong>Motivo</strong><p>{{ sol.motivo }}</p></div>
+    </section>
+    <section class="card process-card">
+        <h3>Decision administrativa</h3>
+        {% if sol.estado == 'aprobado_jefe' %}
+        <p>Al aprobar, los dias se descontaran de la programacion anual y los turnos del periodo quedaran libres.</p>
+        <form method="post" action="{% url 'admin_procesar_solicitud' 'vacaciones' sol.id %}">
+            {% csrf_token %}
+            <label for="comentario">Comentario</label>
+            <textarea id="comentario" class="form-control" name="comentario" rows="4"></textarea>
+            <div class="decision-actions"><button class="btn btn-danger" type="submit" name="accion" value="rechazar">Rechazar</button><button class="btn btn-primary" type="submit" name="accion" value="aprobar">Aprobar</button></div>
+        </form>
+        {% else %}
+        <p>Procesada por: {% if sol.procesado_por %}{{ sol.procesado_por.nombre_completo }}{% else %}-{% endif %}</p>
+        <p>{{ sol.comentario_admin|default:"Sin comentario administrativo." }}</p>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

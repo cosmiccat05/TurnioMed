@@ -3,16 +3,18 @@
 const userCard = document.getElementById('userCard');
 const userDropdown = document.getElementById('userDropdown');
 
-// Al hacer clic en la tarjeta, alterna la clase 'show'
-userCard.addEventListener('click', function(e) {
-    e.stopPropagation(); // Evita que el clic cierre el menú inmediatamente
-    userDropdown.classList.toggle('show');
-});
+if (userCard && userDropdown) {
+    userCard.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const isOpen = userDropdown.classList.toggle('show');
+        userCard.classList.toggle('open', isOpen);
+    });
 
-// Si haces clic en cualquier otro lado de la página, cierra el menú
-document.addEventListener('click', function() {
-    userDropdown.classList.remove('show');
-});
+    document.addEventListener('click', function() {
+        userDropdown.classList.remove('show');
+        userCard.classList.remove('open');
+    });
+}
 // para q el reloj recupere la hora irl
 function actualizarReloj() {
     const ahora = new Date();

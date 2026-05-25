@@ -24,7 +24,7 @@
                 <div class="stat-label">Turnos de hoy</div>
                 <div class="stat-value">{{ turnos_hoy }}</div>
                 <div class="stat-sub">en el área</div>
-                <a href="#" class="stat-link">Ver detalle ></a>
+                <a href="{% url 'turnos' %}" class="stat-link">Ver detalle ></a>
             </div>
         </div>
 
@@ -33,10 +33,10 @@
                 <i class="fa-regular fa-clock"></i>
             </div>
             <div class="stat-body">
-                <div class="stat-label">Horas acumuladas (mes)</div>
-                <div class="stat-value">150<small style="font-size:14px;font-weight:500"> h</small></div>
-                <div class="stat-sub"><span class="extra">+50 h extra</span></div>
-                <a href="#" class="stat-link">Ver reporte ></a>
+                <div class="stat-label">Horas programadas (mes)</div>
+                <div class="stat-value">{{ horas_mes }}<small style="font-size:14px;font-weight:500"> h</small></div>
+                <div class="stat-sub">segun programacion vigente</div>
+                <a href="{% url 'reportes' %}" class="stat-link">Ver reporte ></a>
             </div>
         </div>
 
@@ -48,7 +48,7 @@
                 <div class="stat-label">Solicitudes pendientes</div>
                 <div class="stat-value">{{ total_pendientes }}</div>
                 <div class="stat-sub"><span class="warn">requieren revisión</span></div>
-                <a href="#" class="stat-link">Revisar solicitudes ></a>
+                <a href="{% url 'solicitudes' %}" class="stat-link">Revisar solicitudes ></a>
             </div>
         </div>
     </div>
@@ -86,15 +86,18 @@
                     {% endfor %}
                 </select>
             {% endif %}
-            <select class="view-select">
-                <option>Semana</option>
-                <option>Día</option>
-                <option>Mes</option>
-            </select>
             <div class="week-nav">
-                <button class="nav-arrow"><i class="fa-solid fa-chevron-left"></i></button>
-                <span>20 - 26 de abril, 2026</span>
-                <button class="nav-arrow"><i class="fa-solid fa-chevron-right"></i></button>
+                <a class="nav-arrow"
+                   href="{% url 'home' %}?fecha={{ semana_anterior|date:'Y-m-d' }}{% if filtro_actual %}&{{ filtro_actual }}{% endif %}">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </a>
+
+                <span>{{ inicio_semana|date:"d" }} - {{ fin_semana|date:"d" }} de {{ inicio_semana|date:"F" }}, {{ inicio_semana|date:"Y" }}</span>
+
+                <a class="nav-arrow"
+                   href="{% url 'home' %}?fecha={{ semana_siguiente|date:'Y-m-d' }}{% if filtro_actual %}&{{ filtro_actual }}{% endif %}">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </a>
             </div>
         </div>
     </div>

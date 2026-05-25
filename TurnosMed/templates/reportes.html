@@ -1,589 +1,164 @@
+{% extends 'base.html' %}
 {% load static %}
-<html lang="es">
-<head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Reportes - Gestión de Turnos Médicos</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="{% static 'css/base.css' %}">
-    <link rel="stylesheet" href="{% static 'css/reportes.css' %}">
-</head>
-<body>
-    <aside class="sidebar">
-        <div class="sidebar-logo">
-            <div class="logo-icon">
-                <img src="{% static 'img/logo.png' %}" alt="logo">
-            </div>
-            <div class="logo-text">
-                <span>Gestión de Turnos Médicos</span>
-                <strong>TurnioMed</strong>
+
+{% block title %}Reportes - TurnioMed{% endblock %}
+{% block nav_reportes %}active{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/reportes.css' %}">
+{% endblock %}
+{% block page_title %}Reportes{% endblock %}
+
+{% block content %}
+<div class="rep-layout">
+    <aside class="rep-sidebar">
+        <div class="rep-panel">
+            <div class="rep-panel-title"><i class="fa-solid fa-filter"></i> Categoria</div>
+            <div class="rep-categories">
+                <a class="rep-cat {% if categoria == 'cambios' %}active{% endif %}" href="?categoria=cambios&periodo={% if mensual %}mensual{% else %}anual{% endif %}&anio={{ anio }}&mes={{ mes }}&area={{ area_id }}&sala={{ sala_id }}">
+                    <div class="rep-cat-icon blue"><i class="fa-solid fa-arrows-rotate"></i></div>
+                    <div class="rep-cat-body"><span class="rep-cat-name">Cambios de turno</span></div>
+                    <i class="fa-solid fa-chevron-right rep-cat-arrow"></i>
+                </a>
+                <a class="rep-cat {% if categoria == 'vacaciones' %}active{% endif %}" href="?categoria=vacaciones&periodo={% if mensual %}mensual{% else %}anual{% endif %}&anio={{ anio }}&mes={{ mes }}&area={{ area_id }}&sala={{ sala_id }}">
+                    <div class="rep-cat-icon teal"><i class="fa-solid fa-umbrella-beach"></i></div>
+                    <div class="rep-cat-body"><span class="rep-cat-name">Vacaciones</span></div>
+                    <i class="fa-solid fa-chevron-right rep-cat-arrow"></i>
+                </a>
+                <a class="rep-cat {% if categoria == 'descansos' %}active{% endif %}" href="?categoria=descansos&periodo={% if mensual %}mensual{% else %}anual{% endif %}&anio={{ anio }}&mes={{ mes }}&area={{ area_id }}&sala={{ sala_id }}">
+                    <div class="rep-cat-icon red"><i class="fa-solid fa-bed-pulse"></i></div>
+                    <div class="rep-cat-body"><span class="rep-cat-name">Descansos medicos</span></div>
+                    <i class="fa-solid fa-chevron-right rep-cat-arrow"></i>
+                </a>
             </div>
         </div>
-        <nav class="sidebar-nav">
-            <a href="{% url 'home' %}" class="nav-item">
-                <i class="fa-solid fa-house"></i> Inicio
-            </a>
-            <a href="{% url 'turnos' %}" class="nav-item">
-                <i class="fa-solid fa-calendar-days"></i> Turnos
-            </a>
-            <a href="{% url 'solicitudes' %}" class="nav-item">
-                <i class="fa-solid fa-file-lines"></i> Solicitudes
-                <span class="nav-badge">8</span>
-            </a>
-            <a href="{% url 'vacaciones' %}" class="nav-item">
-                <i class="fa-solid fa-umbrella-beach"></i> Vacaciones
-            </a>
-            <a href="{% url 'reportes' %}" class="nav-item active">
-                <i class="fa-solid fa-chart-line"></i> Reportes
-            </a>
-            <a href="#" class="nav-item">
-                <i class="fa-solid fa-gear"></i> Configuración
-            </a>
-            <a href="#" class="nav-item">
-                <i class="fa-regular fa-circle-question"></i> Ayuda
-            </a>
-        </nav>
-        <div class="sidebar-footer">
-            <div class="user-card">
-                <div class="user-avatar">GQ</div>
-                <div class="user-info">
-                    <strong>Lic. Gianina Quispe</strong>
-                    <span>Jefe de Área</span>
-                </div>
-                <i class="fa-solid fa-chevron-down"></i>
+
+        <form class="rep-panel" method="get">
+            <input type="hidden" name="categoria" value="{{ categoria }}">
+            <div class="rep-panel-title"><i class="fa-regular fa-calendar"></i> Periodo</div>
+            <div class="rep-period-toggle">
+                <button class="rep-period-btn {% if mensual %}active{% endif %}" name="periodo" value="mensual" type="submit">Mensual</button>
+                <button class="rep-period-btn {% if not mensual %}active{% endif %}" name="periodo" value="anual" type="submit">Anual</button>
             </div>
+            {% if mensual %}
+            <div class="rep-filter-field">
+                <label>Mes</label>
+                <div class="select-wrap">
+                    <select name="mes" onchange="this.form.submit()">
+                        {% for numero, nombre in meses %}
+                        <option value="{{ numero }}" {% if numero == mes %}selected{% endif %}>{{ nombre }}</option>
+                        {% endfor %}
+                    </select>
+                    <i class="fa-solid fa-chevron-down"></i>
+                </div>
+            </div>
+            {% endif %}
+            <div class="rep-filter-field">
+                <label>Año</label>
+                <div class="select-wrap">
+                    <select name="anio" onchange="this.form.submit()">
+                        <option value="{{ anio|add:'-1' }}">{{ anio|add:'-1' }}</option>
+                        <option value="{{ anio }}" selected>{{ anio }}</option>
+                        <option value="{{ anio|add:'1' }}">{{ anio|add:'1' }}</option>
+                    </select>
+                    <i class="fa-solid fa-chevron-down"></i>
+                </div>
+            </div>
+            {% if usuario.es_jefe_departamento %}
+            <div class="rep-filter-field">
+                <label>Area</label>
+                <div class="select-wrap">
+                    <select name="area" onchange="this.form.submit()">
+                        <option value="all">Todas las areas</option>
+                        {% for area in areas %}
+                        <option value="{{ area.id }}" {% if area_id == area.id|stringformat:'s' %}selected{% endif %}>{{ area.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                    <i class="fa-solid fa-chevron-down"></i>
+                </div>
+            </div>
+            {% elif usuario.es_jefe_area %}
+            <div class="rep-filter-field">
+                <label>Sala</label>
+                <div class="select-wrap">
+                    <select name="sala" onchange="this.form.submit()">
+                        <option value="all">Todas las salas</option>
+                        {% for sala in salas %}
+                        <option value="{{ sala.id }}" {% if sala_id == sala.id|stringformat:'s' %}selected{% endif %}>{{ sala.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                    <i class="fa-solid fa-chevron-down"></i>
+                </div>
+            </div>
+            {% endif %}
+        </form>
+
+        <div class="rep-panel">
+            <div class="rep-panel-title"><i class="fa-solid fa-file-export"></i> Exportar reporte</div>
+            <p class="rep-export-hint">Descarga los registros visibles del periodo seleccionado.</p>
+            <a class="rep-btn-export pdf" href="?categoria={{ categoria }}&periodo={% if mensual %}mensual{% else %}anual{% endif %}&anio={{ anio }}&mes={{ mes }}&area={{ area_id }}&sala={{ sala_id }}&export=pdf">
+                <i class="fa-solid fa-file-pdf"></i> Exportar en PDF
+            </a>
         </div>
     </aside>
 
-    <main class="main">
-        <header class="topbar">
-            <div class="topbar-left">
-                <h1>Reportes</h1>
-            </div>
-            <div class="topbar-right">
-                <div class="notif-btn">
-                    <i class="fa-regular fa-bell"></i>
-                    <span class="notif-dot"></span>
+    <div class="rep-main">
+        <div class="rep-main-head">
+            <div class="rep-main-head-left">
+                <div class="rep-main-icon {% if categoria == 'vacaciones' %}teal{% elif categoria == 'descansos' %}red{% else %}blue{% endif %}">
+                    <i class="fa-solid {% if categoria == 'vacaciones' %}fa-umbrella-beach{% elif categoria == 'descansos' %}fa-bed-pulse{% else %}fa-arrows-rotate{% endif %}"></i>
                 </div>
-                <div class="topbar-date">
-                    <div class="date">Viernes, 24 de abril de 2026</div>
-                    <div class="time">12:30 PM</div>
+                <div>
+                    <h2 class="rep-main-title">{{ titulo }}</h2>
+                    <p class="rep-main-sub">{{ periodo_texto }} - {{ total }} registros</p>
                 </div>
-            </div>
-        </header>
-
-        <div class="content">
-            <div class="rep-layout">
-
-                <!-- ══════════════════════════════
-                     COLUMNA IZQUIERDA — Filtros
-                ══════════════════════════════ -->
-                <aside class="rep-sidebar">
-
-                    <!-- Categoría -->
-                    <div class="rep-panel">
-                        <div class="rep-panel-title">
-                            <i class="fa-solid fa-filter"></i> Categoría
-                        </div>
-                        <div class="rep-categories">
-                            <button class="rep-cat active" data-cat="cambios">
-                                <div class="rep-cat-icon blue">
-                                    <i class="fa-solid fa-arrows-rotate"></i>
-                                </div>
-                                <div class="rep-cat-body">
-                                    <span class="rep-cat-name">Cambios de turno</span>
-                                    <span class="rep-cat-count">18 registros</span>
-                                </div>
-                                <i class="fa-solid fa-chevron-right rep-cat-arrow"></i>
-                            </button>
-                            <button class="rep-cat" data-cat="vacaciones">
-                                <div class="rep-cat-icon teal">
-                                    <i class="fa-solid fa-umbrella-beach"></i>
-                                </div>
-                                <div class="rep-cat-body">
-                                    <span class="rep-cat-name">Vacaciones</span>
-                                    <span class="rep-cat-count">4 registros</span>
-                                </div>
-                                <i class="fa-solid fa-chevron-right rep-cat-arrow"></i>
-                            </button>
-                            <button class="rep-cat" data-cat="descansos">
-                                <div class="rep-cat-icon red">
-                                    <i class="fa-solid fa-bed-pulse"></i>
-                                </div>
-                                <div class="rep-cat-body">
-                                    <span class="rep-cat-name">Descansos médicos</span>
-                                    <span class="rep-cat-count">3 registros</span>
-                                </div>
-                                <i class="fa-solid fa-chevron-right rep-cat-arrow"></i>
-                            </button>
-                            <!-- Espacio para futuras categorías -->
-                            <button class="rep-cat disabled" disabled>
-                                <div class="rep-cat-icon gray">
-                                    <i class="fa-solid fa-clock-rotate-left"></i>
-                                </div>
-                                <div class="rep-cat-body">
-                                    <span class="rep-cat-name">Horas extra</span>
-                                    <span class="rep-cat-count rep-soon">Próximamente</span>
-                                </div>
-                            </button>
-                            <button class="rep-cat disabled" disabled>
-                                <div class="rep-cat-icon gray">
-                                    <i class="fa-solid fa-triangle-exclamation"></i>
-                                </div>
-                                <div class="rep-cat-body">
-                                    <span class="rep-cat-name">Incidencias</span>
-                                    <span class="rep-cat-count rep-soon">Próximamente</span>
-                                </div>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Período -->
-                    <div class="rep-panel">
-                        <div class="rep-panel-title">
-                            <i class="fa-regular fa-calendar"></i> Período
-                        </div>
-                        <div class="rep-period-toggle">
-                            <button class="rep-period-btn active" data-period="mensual">Mensual</button>
-                            <button class="rep-period-btn" data-period="anual">Anual</button>
-                        </div>
-                        <div class="rep-filter-field" id="rep-mes-wrap">
-                            <label>Mes</label>
-                            <div class="select-wrap">
-                                <select>
-                                    <option>Abril 2026</option>
-                                    <option>Marzo 2026</option>
-                                    <option>Febrero 2026</option>
-                                    <option>Enero 2026</option>
-                                </select>
-                                <i class="fa-solid fa-chevron-down"></i>
-                            </div>
-                        </div>
-                        <div class="rep-filter-field hidden" id="rep-anio-wrap">
-                            <label>Año</label>
-                            <div class="select-wrap">
-                                <select>
-                                    <option>2026</option>
-                                    <option>2025</option>
-                                </select>
-                                <i class="fa-solid fa-chevron-down"></i>
-                            </div>
-                        </div>
-                        <div class="rep-filter-field">
-                            <label>Área</label>
-                            <div class="select-wrap">
-                                <select>
-                                    <option>Todas las áreas</option>
-                                    <option>Sala 1A</option>
-                                    <option>Sala 1B</option>
-                                    <option>Sala 2C</option>
-                                </select>
-                                <i class="fa-solid fa-chevron-down"></i>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Exportar -->
-                    <div class="rep-panel">
-                        <div class="rep-panel-title">
-                            <i class="fa-solid fa-file-export"></i> Exportar reporte
-                        </div>
-                        <p class="rep-export-hint">Descarga el reporte de la categoría y período seleccionados.</p>
-                        <button class="rep-btn-export pdf">
-                            <i class="fa-solid fa-file-pdf"></i> Exportar en PDF
-                        </button>
-                        <button class="rep-btn-export excel">
-                            <i class="fa-solid fa-file-excel"></i> Exportar en Excel
-                        </button>
-                    </div>
-
-                </aside>
-
-                <!-- ══════════════════════════════
-                     COLUMNA DERECHA — Historial
-                ══════════════════════════════ -->
-                <div class="rep-main">
-
-                    <!-- Cabecera del historial -->
-                    <div class="rep-main-head">
-                        <div class="rep-main-head-left">
-                            <div class="rep-main-icon blue" id="rep-main-icon">
-                                <i class="fa-solid fa-arrows-rotate"></i>
-                            </div>
-                            <div>
-                                <h2 class="rep-main-title" id="rep-main-title">Cambios de turno</h2>
-                                <p class="rep-main-sub" id="rep-main-sub">Abril 2026 · 18 registros</p>
-                            </div>
-                        </div>
-                        <div class="rep-search-wrap">
-                            <i class="fa-solid fa-magnifying-glass"></i>
-                            <input type="text" placeholder="Buscar por nombre...">
-                        </div>
-                    </div>
-
-                    <!-- Stats resumen -->
-                    <div class="rep-stats-row" id="rep-stats-cambios">
-                        <div class="rep-stat">
-                            <span class="rep-stat-val">18</span>
-                            <span class="rep-stat-label">Total</span>
-                        </div>
-                        <div class="rep-stat-div"></div>
-                        <div class="rep-stat">
-                            <span class="rep-stat-val green">14</span>
-                            <span class="rep-stat-label">Aprobados</span>
-                        </div>
-                        <div class="rep-stat-div"></div>
-                        <div class="rep-stat">
-                            <span class="rep-stat-val amber">3</span>
-                            <span class="rep-stat-label">Pendientes</span>
-                        </div>
-                        <div class="rep-stat-div"></div>
-                        <div class="rep-stat">
-                            <span class="rep-stat-val red">1</span>
-                            <span class="rep-stat-label">Rechazados</span>
-                        </div>
-                    </div>
-
-                    <div class="rep-stats-row hidden" id="rep-stats-vacaciones">
-                        <div class="rep-stat">
-                            <span class="rep-stat-val">4</span>
-                            <span class="rep-stat-label">Solicitudes</span>
-                        </div>
-                        <div class="rep-stat-div"></div>
-                        <div class="rep-stat">
-                            <span class="rep-stat-val green">28</span>
-                            <span class="rep-stat-label">Días aprobados</span>
-                        </div>
-                        <div class="rep-stat-div"></div>
-                        <div class="rep-stat">
-                            <span class="rep-stat-val amber">2</span>
-                            <span class="rep-stat-label">Pendientes</span>
-                        </div>
-                        <div class="rep-stat-div"></div>
-                        <div class="rep-stat">
-                            <span class="rep-stat-val blue">18</span>
-                            <span class="rep-stat-label">Días prom. dispon.</span>
-                        </div>
-                    </div>
-
-                    <div class="rep-stats-row hidden" id="rep-stats-descansos">
-                        <div class="rep-stat">
-                            <span class="rep-stat-val">3</span>
-                            <span class="rep-stat-label">Registros</span>
-                        </div>
-                        <div class="rep-stat-div"></div>
-                        <div class="rep-stat">
-                            <span class="rep-stat-val red">1</span>
-                            <span class="rep-stat-label">En curso</span>
-                        </div>
-                        <div class="rep-stat-div"></div>
-                        <div class="rep-stat">
-                            <span class="rep-stat-val amber">12</span>
-                            <span class="rep-stat-label">Días no laborados</span>
-                        </div>
-                        <div class="rep-stat-div"></div>
-                        <div class="rep-stat">
-                            <span class="rep-stat-val green">3</span>
-                            <span class="rep-stat-label">Con certificado</span>
-                        </div>
-                    </div>
-
-                    <!-- ── HISTORIAL: CAMBIOS DE TURNO ── -->
-                    <div class="rep-history" id="hist-cambios">
-                        <div class="hist-card">
-                            <div class="hist-avatar">JR</div>
-                            <div class="hist-body">
-                                <div class="hist-top">
-                                    <span class="hist-name">Dr. Juan Ramírez</span>
-                                    <span class="badge approved">Aprobado</span>
-                                </div>
-                                <div class="hist-meta">
-                                    <span><i class="fa-solid fa-stethoscope"></i> Medicina Interna</span>
-                                    <span><i class="fa-regular fa-calendar"></i> Sáb 04 abr 2026</span>
-                                </div>
-                                <div class="hist-detail">
-                                    Cambio de turno: <span class="sc n4">N4</span> → <span class="sc d4">D4</span>
-                                    &nbsp;·&nbsp; Intercambia con <strong>Dra. Ana López</strong>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="hist-card">
-                            <div class="hist-avatar">AL</div>
-                            <div class="hist-body">
-                                <div class="hist-top">
-                                    <span class="hist-name">Dra. Ana López</span>
-                                    <span class="badge approved">Aprobado</span>
-                                </div>
-                                <div class="hist-meta">
-                                    <span><i class="fa-solid fa-stethoscope"></i> Cardiología</span>
-                                    <span><i class="fa-regular fa-calendar"></i> Lun 06 abr 2026</span>
-                                </div>
-                                <div class="hist-detail">
-                                    Cambio de turno: <span class="sc m">M</span> → <span class="sc t">T</span>
-                                    &nbsp;·&nbsp; Intercambia con <strong>Dra. María Gómez</strong>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="hist-card">
-                            <div class="hist-avatar">MG</div>
-                            <div class="hist-body">
-                                <div class="hist-top">
-                                    <span class="hist-name">Dra. María Gómez</span>
-                                    <span class="badge pending">Pendiente</span>
-                                </div>
-                                <div class="hist-meta">
-                                    <span><i class="fa-solid fa-stethoscope"></i> Urgencias</span>
-                                    <span><i class="fa-regular fa-calendar"></i> Mar 07 abr 2026</span>
-                                </div>
-                                <div class="hist-detail">
-                                    Cambio de turno: <span class="sc d">D</span> → <span class="sc n">N</span>
-                                    &nbsp;·&nbsp; Intercambia con <strong>Dr. Luis Martínez</strong>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="hist-card">
-                            <div class="hist-avatar">LM</div>
-                            <div class="hist-body">
-                                <div class="hist-top">
-                                    <span class="hist-name">Dr. Luis Martínez</span>
-                                    <span class="badge approved">Aprobado</span>
-                                </div>
-                                <div class="hist-meta">
-                                    <span><i class="fa-solid fa-stethoscope"></i> Neumología</span>
-                                    <span><i class="fa-regular fa-calendar"></i> Mié 08 abr 2026</span>
-                                </div>
-                                <div class="hist-detail">
-                                    Cambio de turno: <span class="sc t">T</span> → <span class="sc m">M</span>
-                                    &nbsp;·&nbsp; Intercambia con <strong>Dra. Sofía Méndez</strong>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="hist-card">
-                            <div class="hist-avatar">SM</div>
-                            <div class="hist-body">
-                                <div class="hist-top">
-                                    <span class="hist-name">Dra. Sofía Méndez</span>
-                                    <span class="badge rejected">Rechazado</span>
-                                </div>
-                                <div class="hist-meta">
-                                    <span><i class="fa-solid fa-stethoscope"></i> Endocrinología</span>
-                                    <span><i class="fa-regular fa-calendar"></i> Jue 09 abr 2026</span>
-                                </div>
-                                <div class="hist-detail">
-                                    Cambio de turno: <span class="sc d4">D4</span> → <span class="sc n4">N4</span>
-                                    &nbsp;·&nbsp; Intercambia con <strong>Dr. Pedro Sánchez</strong>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- ── HISTORIAL: VACACIONES ── -->
-                    <div class="rep-history hidden" id="hist-vacaciones">
-                        <div class="hist-card">
-                            <div class="hist-avatar">JR</div>
-                            <div class="hist-body">
-                                <div class="hist-top">
-                                    <span class="hist-name">Dr. Juan Ramírez</span>
-                                    <span class="badge approved">Aprobado</span>
-                                </div>
-                                <div class="hist-meta">
-                                    <span><i class="fa-solid fa-stethoscope"></i> Medicina Interna</span>
-                                    <span><i class="fa-regular fa-calendar"></i> 01 abr – 15 abr 2026</span>
-                                </div>
-                                <div class="hist-detail">
-                                    Tipo: <strong>Ordinarias</strong>
-                                    &nbsp;·&nbsp; <strong>15 días</strong>
-                                    &nbsp;·&nbsp; Días restantes: <strong>15</strong>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="hist-card">
-                            <div class="hist-avatar">AL</div>
-                            <div class="hist-body">
-                                <div class="hist-top">
-                                    <span class="hist-name">Dra. Ana López</span>
-                                    <span class="badge approved">Aprobado</span>
-                                </div>
-                                <div class="hist-meta">
-                                    <span><i class="fa-solid fa-stethoscope"></i> Cardiología</span>
-                                    <span><i class="fa-regular fa-calendar"></i> 10 abr – 17 abr 2026</span>
-                                </div>
-                                <div class="hist-detail">
-                                    Tipo: <strong>Adelanto</strong>
-                                    &nbsp;·&nbsp; <strong>7 días</strong>
-                                    &nbsp;·&nbsp; Días restantes: <strong>23</strong>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="hist-card">
-                            <div class="hist-avatar">MG</div>
-                            <div class="hist-body">
-                                <div class="hist-top">
-                                    <span class="hist-name">Dra. María Gómez</span>
-                                    <span class="badge pending">Pendiente</span>
-                                </div>
-                                <div class="hist-meta">
-                                    <span><i class="fa-solid fa-stethoscope"></i> Urgencias</span>
-                                    <span><i class="fa-regular fa-calendar"></i> 20 abr – 24 abr 2026</span>
-                                </div>
-                                <div class="hist-detail">
-                                    Tipo: <strong>Ordinarias</strong>
-                                    &nbsp;·&nbsp; <strong>5 días</strong>
-                                    &nbsp;·&nbsp; Días restantes: <strong>25</strong>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="hist-card">
-                            <div class="hist-avatar">LM</div>
-                            <div class="hist-body">
-                                <div class="hist-top">
-                                    <span class="hist-name">Dr. Luis Martínez</span>
-                                    <span class="badge approved">Aprobado</span>
-                                </div>
-                                <div class="hist-meta">
-                                    <span><i class="fa-solid fa-stethoscope"></i> Neumología</span>
-                                    <span><i class="fa-regular fa-calendar"></i> 05 abr – 15 abr 2026</span>
-                                </div>
-                                <div class="hist-detail">
-                                    Tipo: <strong>Ordinarias</strong>
-                                    &nbsp;·&nbsp; <strong>10 días</strong>
-                                    &nbsp;·&nbsp; Días restantes: <strong>20</strong>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- ── HISTORIAL: DESCANSOS ── -->
-                    <div class="rep-history hidden" id="hist-descansos">
-                        <div class="hist-card">
-                            <div class="hist-avatar">JR</div>
-                            <div class="hist-body">
-                                <div class="hist-top">
-                                    <span class="hist-name">Dr. Juan Ramírez</span>
-                                    <span class="badge approved">Aprobado</span>
-                                </div>
-                                <div class="hist-meta">
-                                    <span><i class="fa-solid fa-stethoscope"></i> Medicina Interna</span>
-                                    <span><i class="fa-regular fa-calendar"></i> 01 abr – 08 abr 2026</span>
-                                </div>
-                                <div class="hist-detail">
-                                    Diagnóstico: <strong>Lumbago agudo</strong>
-                                    &nbsp;·&nbsp; <strong>8 días</strong>
-                                    &nbsp;·&nbsp; Certificado: <span class="cert yes"><i class="fa-solid fa-check"></i> Adjunto</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="hist-card">
-                            <div class="hist-avatar">AL</div>
-                            <div class="hist-body">
-                                <div class="hist-top">
-                                    <span class="hist-name">Dra. Ana López</span>
-                                    <span class="badge approved">Aprobado</span>
-                                </div>
-                                <div class="hist-meta">
-                                    <span><i class="fa-solid fa-stethoscope"></i> Cardiología</span>
-                                    <span><i class="fa-regular fa-calendar"></i> 10 abr – 14 abr 2026</span>
-                                </div>
-                                <div class="hist-detail">
-                                    Diagnóstico: <strong>Síndrome gripal</strong>
-                                    &nbsp;·&nbsp; <strong>4 días</strong>
-                                    &nbsp;·&nbsp; Certificado: <span class="cert yes"><i class="fa-solid fa-check"></i> Adjunto</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="hist-card">
-                            <div class="hist-avatar">MG</div>
-                            <div class="hist-body">
-                                <div class="hist-top">
-                                    <span class="hist-name">Dra. María Gómez</span>
-                                    <span class="badge pending">Pendiente</span>
-                                </div>
-                                <div class="hist-meta">
-                                    <span><i class="fa-solid fa-stethoscope"></i> Urgencias</span>
-                                    <span><i class="fa-regular fa-calendar"></i> 18 abr 2026 · En curso</span>
-                                </div>
-                                <div class="hist-detail">
-                                    Diagnóstico: <strong>Gastroenteritis</strong>
-                                    &nbsp;·&nbsp; Certificado: <span class="cert pending"><i class="fa-solid fa-clock"></i> Pendiente</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-                <!-- fin rep-main -->
-
             </div>
         </div>
 
-        <footer class="page-footer">
-            <span>© 2026 Hospital de Emergencias Pediátricas – Gestión de Turnos Médicos</span>
-            <span>Versión 1.0.0</span>
-        </footer>
-    </main>
+        <div class="rep-stats-row">
+            <div class="rep-stat"><span class="rep-stat-val">{{ total }}</span><span class="rep-stat-label">Total</span></div>
+            <div class="rep-stat-div"></div>
+            <div class="rep-stat"><span class="rep-stat-val green">{{ aprobados }}</span><span class="rep-stat-label">Procesados</span></div>
+            <div class="rep-stat-div"></div>
+            <div class="rep-stat"><span class="rep-stat-val amber">{{ pendientes }}</span><span class="rep-stat-label">Pendientes</span></div>
+            <div class="rep-stat-div"></div>
+            <div class="rep-stat"><span class="rep-stat-val red">{{ rechazados }}</span><span class="rep-stat-label">Rechazados</span></div>
+        </div>
 
-<script>
-    /* ── Cambio de categoría ── */
-    const catMeta = {
-        cambios:    { icon: 'fa-arrows-rotate',  color: 'blue', title: 'Cambios de turno',  sub: 'Abril 2026 · 18 registros' },
-        vacaciones: { icon: 'fa-umbrella-beach', color: 'teal', title: 'Vacaciones',         sub: 'Abril 2026 · 4 registros'  },
-        descansos:  { icon: 'fa-bed-pulse',      color: 'red',  title: 'Descansos médicos', sub: 'Abril 2026 · 3 registros'  },
-    };
-
-    document.querySelectorAll('.rep-cat:not(.disabled)').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const cat = btn.dataset.cat;
-
-            /* Botones activos */
-            document.querySelectorAll('.rep-cat').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-
-            /* Header */
-            const m = catMeta[cat];
-            const iconEl = document.getElementById('rep-main-icon');
-            iconEl.className = `rep-main-icon ${m.color}`;
-            iconEl.innerHTML = `<i class="fa-solid ${m.icon}"></i>`;
-            document.getElementById('rep-main-title').textContent = m.title;
-            document.getElementById('rep-main-sub').textContent   = m.sub;
-
-            /* Stats */
-            document.querySelectorAll('.rep-stats-row').forEach(r => r.classList.add('hidden'));
-            document.getElementById(`rep-stats-${cat}`).classList.remove('hidden');
-
-            /* Historial */
-            document.querySelectorAll('.rep-history').forEach(h => h.classList.add('hidden'));
-            document.getElementById(`hist-${cat}`).classList.remove('hidden');
-        });
-    });
-
-    /* ── Toggle mensual / anual ── */
-    document.querySelectorAll('.rep-period-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.rep-period-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            const isMensual = btn.dataset.period === 'mensual';
-            document.getElementById('rep-mes-wrap').classList.toggle('hidden', !isMensual);
-            document.getElementById('rep-anio-wrap').classList.toggle('hidden', isMensual);
-        });
-    });
-
-    /* ── Exportar placeholder ── */
-    document.querySelectorAll('.rep-btn-export').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const tipo = btn.classList.contains('pdf') ? 'PDF' : 'Excel';
-            const cat  = document.querySelector('.rep-cat.active')?.dataset.cat || '—';
-            alert(`Exportando "${catMeta[cat]?.title}" en ${tipo}...\n(Se conecta al backend Django)`);
-        });
-    });
-
-    /* ── Buscar en historial ── */
-    document.querySelector('.rep-search-wrap input').addEventListener('input', function () {
-        const q = this.value.toLowerCase();
-        document.querySelectorAll('.rep-history:not(.hidden) .hist-card').forEach(card => {
-            const name = card.querySelector('.hist-name').textContent.toLowerCase();
-            card.style.display = name.includes(q) ? '' : 'none';
-        });
-    });
-</script>
-</body>
-</html>
+        <div class="rep-history">
+            {% for item in items %}
+            <div class="hist-card">
+                <div class="hist-avatar">{{ item.solicitante.nombre|first|upper }}{{ item.solicitante.apellidos|first|upper }}</div>
+                <div class="hist-body">
+                    <div class="hist-top">
+                        <span class="hist-name">{{ item.solicitante.nombre_completo }}</span>
+                        <span class="badge {% if item.estado == 'procesado' %}approved{% elif item.estado == 'pendiente' or item.estado == 'aprobado_jefe' %}pending{% else %}rejected{% endif %}">
+                            {{ item.get_estado_display }}
+                        </span>
+                    </div>
+                    <div class="hist-meta">
+                        <span><i class="fa-regular fa-calendar"></i> Solicitado {{ item.fecha_solicitud|date:"d/m/Y" }}</span>
+                        <span>{{ item.solicitante.cargo_display }}</span>
+                    </div>
+                    <div class="hist-detail">
+                        {% if categoria == 'cambios' %}
+                        Cambio: <span class="sc {{ item.turno_original.codigo|lower }}">{{ item.turno_original.codigo }}</span>
+                        {{ item.turno_original.fecha|date:"d/m/Y" }} por
+                        <span class="sc {{ item.turno_destino.codigo|lower }}">{{ item.turno_destino.codigo }}</span>
+                        {{ item.turno_destino.fecha|date:"d/m/Y" }}
+                        {% elif categoria == 'vacaciones' %}
+                        Adelanto: <strong>{{ item.fecha_inicio|date:"d/m/Y" }} a {{ item.fecha_fin|date:"d/m/Y" }}</strong>
+                        {% else %}
+                        Descanso: <strong>{{ item.fecha_inicio|date:"d/m/Y" }} a {% if item.fecha_fin %}{{ item.fecha_fin|date:"d/m/Y" }}{% else %}en curso{% endif %}</strong>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="hist-card">
+                <div class="hist-body">No hay registros para los filtros seleccionados.</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,132 @@
+{% extends 'panel/base.html' %}
+{% load static %}
+
+{% block title %}Personal - Panel Administrativo{% endblock %}
+{% block nav_personal %}active{% endblock %}
+{% block breadcrumb %}Personal{% endblock %}
+{% block page_title %}Personal institucional{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'panel/css/personal.css' %}">
+{% endblock %}
+
+{% block page_actions %}
+<a href="{% url 'admin_personal_agregar' %}" class="btn btn-primary">
+    <i class="fa-solid fa-user-plus"></i> Agregar personal
+</a>
+{% endblock %}
+
+{% block content %}
+<form method="get" id="filterForm" action="{% url 'admin_personal' %}">
+    <div class="personal-toolbar">
+        <div class="search-wrapper">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input type="text" name="buscar" class="form-control search-input"
+                   placeholder="Buscar por nombre, DNI o correo" value="{{ buscar }}">
+        </div>
+        <div class="toolbar-filters">
+            <select class="form-control filter-select" name="tipo" onchange="this.form.submit()">
+                <option value="">Tipo trabajador</option>
+                {% for key, label in tipos_trabajador %}
+                <option value="{{ key }}" {% if tipo == key %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            <select class="form-control filter-select" name="area" onchange="this.form.submit()">
+                <option value="">Area</option>
+                {% for a in areas %}
+                <option value="{{ a.id }}" {% if area == a.id|stringformat:'s' %}selected{% endif %}>{{ a.nombre }}</option>
+                {% endfor %}
+            </select>
+            {% if buscar or tipo or area %}
+            <a href="{% url 'admin_personal' %}" class="btn btn-ghost btn-sm">Limpiar</a>
+            {% endif %}
+        </div>
+    </div>
+</form>
+
+<div class="personal-meta">
+    <span class="results-count">{{ personal.paginator.count }} registros encontrados</span>
+</div>
+
+<div class="personal-list card">
+    {% for trabajador in personal %}
+    <div class="personal-row">
+        <div class="personal-avatar">{{ trabajador.nombre|first|upper }}{{ trabajador.apellidos|first|upper }}</div>
+        <div class="personal-info">
+            <span class="personal-nombre">{{ trabajador.apellidos }}, {{ trabajador.nombre }}</span>
+            <span class="personal-meta-row">
+                {{ trabajador.get_rol_display }}
+                {% if trabajador.departamento %}<span class="personal-sep">|</span>{{ trabajador.departamento.nombre }}{% endif %}
+                {% if trabajador.area %}<span class="personal-sep">|</span>{{ trabajador.area.nombre }}{% endif %}
+                {% if trabajador.sala %}<span class="personal-sep">|</span>{{ trabajador.sala.nombre }}{% endif %}
+            </span>
+        </div>
+        <div class="personal-cargo">
+            <span class="badge badge-accent">{{ trabajador.cargo_display }}</span>
+            {% if not trabajador.is_active %}<span class="badge badge-danger">Inactivo</span>{% endif %}
+        </div>
+        <div class="personal-actions">
+            <a href="{% url 'admin_personal_editar' trabajador.id %}" class="btn btn-secondary btn-sm">
+                <i class="fa-solid fa-pen"></i> Editar
+            </a>
+            {% if trabajador.is_active %}
+            <button type="button" class="btn btn-danger btn-sm"
+                    onclick="abrirModalEliminar('{{ trabajador.nombre_completo|escapejs }}', '{{ trabajador.get_rol_display|escapejs }}', '{{ trabajador.cargo_display|escapejs }}', '{% url "admin_personal_eliminar" trabajador.id %}')">
+                <i class="fa-solid fa-user-slash"></i> Desactivar
+            </button>
+            {% endif %}
+        </div>
+    </div>
+    {% empty %}
+    <div class="personal-empty">
+        <i class="fa-solid fa-users-slash"></i>
+        <p>No se encontro personal con los filtros aplicados.</p>
+    </div>
+    {% endfor %}
+</div>
+
+{% if personal.has_other_pages %}
+<div class="pagination-row">
+    <div class="pagination-info">Pagina {{ personal.number }} de {{ personal.paginator.num_pages }}</div>
+    <div class="pagination-controls">
+        {% if personal.has_previous %}<a href="?{{ query_params }}&pagina={{ personal.previous_page_number }}" class="nav-arrow"><i class="fa-solid fa-chevron-left"></i></a>{% endif %}
+        {% for num in personal.paginator.page_range %}
+            {% if personal.number == num %}<span class="page-num active">{{ num }}</span>
+            {% elif num > personal.number|add:'-3' and num < personal.number|add:'3' %}<a href="?{{ query_params }}&pagina={{ num }}" class="page-num">{{ num }}</a>{% endif %}
+        {% endfor %}
+        {% if personal.has_next %}<a href="?{{ query_params }}&pagina={{ personal.next_page_number }}" class="nav-arrow"><i class="fa-solid fa-chevron-right"></i></a>{% endif %}
+    </div>
+</div>
+{% endif %}
+
+<dialog id="modal-eliminar" class="confirm-dialog">
+    <div class="confirm-card">
+        <div class="confirm-icon-wrap danger"><i class="fa-solid fa-triangle-exclamation"></i></div>
+        <h3 class="confirm-title">Desactivar trabajador</h3>
+        <p class="confirm-subtitle">El historial registrado se conservara.</p>
+        <div class="confirm-user-preview">
+            <div class="confirm-avatar" id="modal-iniciales">--</div>
+            <div class="confirm-user-info">
+                <strong id="modal-nombre">-</strong>
+                <span id="modal-tipo">-</span>
+                <span id="modal-rol">-</span>
+            </div>
+        </div>
+        <div class="confirm-warning">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            El trabajador no podra ingresar ni aparecer en programaciones activas.
+        </div>
+        <form method="post" id="modal-form" action="">
+            {% csrf_token %}
+            <div class="confirm-actions">
+                <button type="submit" class="btn btn-danger">Desactivar</button>
+                <button type="button" class="btn btn-secondary" id="btn-cancelar-modal">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</dialog>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'panel/js/personal.js' %}"></script>
+{% endblock %}

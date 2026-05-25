@@ -1,0 +1,65 @@
+{% extends 'panel/base.html' %}
+{% load static %}
+
+{% block title %}Vacaciones - Panel Administrativo{% endblock %}
+{% block nav_vacaciones %}active{% endblock %}
+{% block breadcrumb %}Vacaciones{% endblock %}
+{% block page_title %}Programacion de vacaciones{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'panel/css/vacaciones.css' %}">{% endblock %}
+{% block page_actions %}
+<a class="btn btn-primary" href="{% url 'admin_vacaciones_programar' %}">
+    <i class="fa-solid fa-calendar-plus"></i> Programar vacaciones
+</a>
+{% endblock %}
+
+{% block content %}
+<form method="get" class="vac-toolbar">
+    <input type="text" class="form-control" name="buscar" value="{{ buscar }}" placeholder="Buscar trabajador o DNI">
+    <select class="form-control" name="area">
+        <option value="">Todas las areas</option>
+        {% for item in areas %}
+        <option value="{{ item.id }}" {% if area == item.id|stringformat:'s' %}selected{% endif %}>{{ item.nombre }}</option>
+        {% endfor %}
+    </select>
+    <input type="number" class="form-control year-input" name="anio" value="{{ anio }}" placeholder="Año">
+    <button type="submit" class="btn btn-secondary">Filtrar</button>
+    {% if buscar or area or anio %}<a class="btn btn-ghost" href="{% url 'admin_vacaciones' %}">Limpiar</a>{% endif %}
+</form>
+
+<div class="card vacation-list">
+    {% if programaciones %}
+    <div class="table-wrapper">
+        <table class="table">
+            <thead><tr><th>Trabajador</th><th>Unidad</th><th>Periodo</th><th>Dias</th><th>Estado</th><th>Programado por</th><th></th></tr></thead>
+            <tbody>
+            {% for item in programaciones %}
+            <tr>
+                <td>
+                    <strong>{{ item.trabajador.apellidos }}, {{ item.trabajador.nombre }}</strong>
+                    <span class="cell-sub">{{ item.trabajador.cargo_display }}</span>
+                </td>
+                <td>{{ item.trabajador.area.nombre|default:"-" }}</td>
+                <td>{{ item.fecha_inicio|date:"d/m/Y" }} - {{ item.fecha_fin|date:"d/m/Y" }}</td>
+                <td>{{ item.dias_totales }}</td>
+                <td><span class="badge {% if item.estado == 'modificado' %}badge-info{% else %}badge-success{% endif %}">{{ item.get_estado_display }}</span></td>
+                <td>{% if item.programado_por %}{{ item.programado_por.nombre_completo }}{% else %}-{% endif %}</td>
+                <td class="vac-actions">
+                    <a class="btn btn-secondary btn-sm" href="{% url 'admin_vacaciones_editar' item.id %}">Editar</a>
+                    <form method="post" action="{% url 'admin_eliminar_vacaciones' item.trabajador_id item.anio %}" onsubmit="return confirm('Eliminar esta programacion?');">
+                        {% csrf_token %}
+                        <button class="btn btn-danger btn-sm" type="submit">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="vac-empty">
+        <i class="fa-regular fa-calendar-xmark"></i>
+        <p>No existen vacaciones programadas para este filtro.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

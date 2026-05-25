@@ -1,0 +1,127 @@
+{% load static %}
+<!-- Volver -->
+<a href="{% url 'solicitudes' %}" class="detail-back">
+    <i class="fa-solid fa-arrow-left"></i> Volver a la lista
+</a>
+
+<!-- Header -->
+<div class="detail-header">
+    <div class="detail-avatar">{{ solicitante_iniciales }}</div>
+    <div class="detail-header-info">
+        <h2>Solicitud de cambio de turno</h2>
+        <span>{{ sol.solicitante.apellidos }}, {{ sol.solicitante.nombre }}</span>
+        <span class="detail-specialty">{{ sol.solicitante.cargo_display }}</span>
+    </div>
+    <div class="detail-header-right">
+        <span class="badge-status {{ sol.estado }}">{{ sol.get_estado_display }}</span>
+        <span class="detail-submitted">
+            Solicitado el<br>
+            {{ sol.fecha_solicitud|date:"d M, Y - h:i A" }}
+        </span>
+    </div>
+</div>
+
+<!-- Cuerpo: 3 columnas -->
+<div class="detail-body cols-3">
+
+    <!-- Col 1: Turno del solicitante -->
+    <div class="detail-col">
+        <div class="detail-col-title">Detalles de la solicitud</div>
+
+        <div class="detail-block">
+            <div class="detail-block-label">
+                <i class="fa-regular fa-calendar"></i>
+                Turno actual (del solicitante)
+            </div>
+            <div class="shift-detail-row">
+                <span class="shift-pill {{ turno_original_pill }}">{{ turno_original.nombre }}</span>
+                <div class="shift-detail-info">
+                    <strong>{{ turno_original.fecha|date:"l, d \d\e F Y" }}</strong>
+                    <span>{{ turno_original.hora_inicio }} – {{ turno_original.hora_fin }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-block">
+            <div class="detail-block-label">
+                <i class="fa-solid fa-arrow-right-arrow-left"></i>
+                Turno solicitado (del compañero)
+            </div>
+            <div class="shift-detail-row">
+                <span class="shift-pill {{ turno_destino_pill }}">{{ turno_destino.nombre }}</span>
+                <div class="shift-detail-info">
+                    <strong>{{ turno_destino.fecha|date:"l, d \d\e F Y" }}</strong>
+                    <span>{{ turno_destino.hora_inicio }} – {{ turno_destino.hora_fin }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Col 2: Compañero -->
+    <div class="detail-col">
+        <div class="detail-col-title">Compañero con el que desea cambiar</div>
+
+        <div class="companion-card">
+            <div class="sol-avatar">{{ companero_iniciales }}</div>
+            <div>
+                <strong>{{ sol.companero.apellidos }}, {{ sol.companero.nombre }}</strong>
+                <span class="detail-specialty">{{ sol.companero.cargo_display }}</span>
+            </div>
+        </div>
+
+        <div class="detail-block">
+            <div class="detail-block-label">
+                <i class="fa-regular fa-calendar"></i>
+                Turno actual (del compañero)
+            </div>
+            <div class="shift-detail-row">
+                <span class="shift-pill {{ turno_destino_pill }}">{{ turno_destino.nombre }}</span>
+                <div class="shift-detail-info">
+                    <strong>{{ turno_destino.fecha|date:"l, d \d\e F Y" }}</strong>
+                    <span>{{ turno_destino.hora_inicio }} – {{ turno_destino.hora_fin }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-block">
+            <div class="detail-block-label">
+                <i class="fa-solid fa-arrow-right-arrow-left"></i>
+                Turno solicitado (del solicitante)
+            </div>
+            <div class="shift-detail-row">
+                <span class="shift-pill {{ turno_original_pill }}">{{ turno_original.nombre }}</span>
+                <div class="shift-detail-info">
+                    <strong>{{ turno_original.fecha|date:"l, d \d\e F Y" }}</strong>
+                    <span>{{ turno_original.hora_inicio }} – {{ turno_original.hora_fin }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Col 3: Motivo -->
+    <div class="detail-col">
+        <div class="detail-col-title">Motivo de la solicitud</div>
+        <p class="detail-reason">{{ sol.motivo }}</p>
+    </div>
+
+</div>
+
+<!-- Acciones -->
+<div class="detail-actions">
+    {% if sol.estado == 'pendiente' %}
+    <button class="btn-reject"
+            onclick="accionSolicitud('rechazar', 'cambio-turno', {{ sol.id }})">
+        <i class="fa-solid fa-xmark"></i> Rechazar
+    </button>
+    <button class="btn-accept"
+            onclick="accionSolicitud('aprobar', 'cambio-turno', {{ sol.id }})">
+        <i class="fa-solid fa-check"></i> Aceptar
+    </button>
+
+    {% else %}
+    <span class="badge-status {{ sol.estado }}" style="font-size:13px; padding:8px 16px">
+        {{ sol.get_estado_display }}
+        {% if sol.revisado_por %} - {{ sol.revisado_por.nombre }} {{ sol.revisado_por.apellidos }}{% endif %}
+    </span>
+    {% endif %}
+</div>

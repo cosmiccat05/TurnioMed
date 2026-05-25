@@ -52,11 +52,11 @@
             <div class="user-card" id="userCard">
                 <div class="user-dropdown" id="userDropdown">
                     <a href="#" class="dropdown-item">
-                        <i class="fa-solid fa-user-doctor"></i> Perfil
+                        <i class="fa-solid fa-circle-user"></i> Mi perfil
                     </a>
                     <hr>
                     <a href="{% url 'logout' %}" class="dropdown-item logout-text">
-                        <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión
+                        <i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión
                     </a>
                 </div>
                 <div class="user-avatar">
@@ -66,7 +66,7 @@
                     <strong>{{ request.user.nombre_completo }}</strong>
                     <span>{{ request.user.cargo_display }}</span>
                 </div>
-                <i class="fa-solid fa-chevron-down"></i>
+                <i class="fa-solid fa-chevron-down user-chevron"></i>
             </div>
         </div>
     </aside>

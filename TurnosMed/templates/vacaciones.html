@@ -1,190 +1,148 @@
+{% extends 'base.html' %}
 {% load static %}
-<html lang="es">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Vacaciones - Gestión de Turnos Médicos</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="{% static 'css/base.css' %}">
-    <link rel="stylesheet" href="{% static 'css/vacaciones.css' %}">
-</head>
-<body>
 
-    <aside class="sidebar">
-        <div class="sidebar-logo">
-            <div class="logo-icon">
-                <img src="../static/img/logo.png" alt="logo">
+{% block title %}Vacaciones - TurnioMed{% endblock %}
+{% block nav_vacaciones %}active{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/vacaciones.css' %}">
+{% endblock %}
+
+{% block page_title %}Vacaciones{% endblock %}
+
+{% block content %}
+
+<div class="vac-page" data-anio="{{ anio }}">
+
+    {{ personal_json|json_script:"personal-data" }}
+    {{ programaciones_json|json_script:"vacaciones-data" }}
+
+    <div class="vac-header">
+        <div class="vac-header-left">
+            <h2>Planificación Anual de Vacaciones - <span id="year-label">{{ anio }}</span></h2>
+
+            <div class="vac-filter-row">
+                {% if usuario.es_jefe_departamento %}
+                <div class="filter-group">
+                    <label>Área</label>
+                    <div class="select-wrap">
+                        <select onchange="location.href='?anio={{ anio }}&area=' + this.value">
+                            <option value="all">Todas</option>
+                            {% for area in areas %}
+                                <option value="{{ area.id }}" {% if area_id == area.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ area.nombre }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if usuario.es_jefe_area %}
+                <div class="filter-group">
+                    <label>Sala</label>
+                    <div class="select-wrap">
+                        <select onchange="location.href='?anio={{ anio }}&sala=' + this.value">
+                            <option value="all">Todas</option>
+                            {% for sala in salas %}
+                                <option value="{{ sala.id }}" {% if sala_id == sala.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ sala.nombre }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </div>
+                </div>
+                {% endif %}
             </div>
-            <div class="logo-text">
-                <span>Gestión de Turnos Médicos</span>
-                <strong>TurnioMed</strong>
+
+            <div class="vac-tabs">
+                <button class="vac-tab active" type="button">Programación Anual</button>
+                <button class="vac-tab" type="button">Saldo y Días</button>
             </div>
         </div>
-        <nav class="sidebar-nav">
-            <a href="{% url 'home' %}" class="nav-item">
-                <i class="fa-solid fa-house"></i> Inicio
-            </a>
-            <a href="{% url 'turnos' %}" class="nav-item">
-                <i class="fa-solid fa-calendar-days"></i> Turnos
-            </a>
-            <a href="{% url 'solicitudes' %}" class="nav-item">
-                <i class="fa-solid fa-file-lines"></i> Solicitudes
-                <span class="nav-badge">8</span>
-            </a>
-            <a href="{% url 'vacaciones' %}" class="nav-item active">
-                <i class="fa-solid fa-umbrella-beach"></i> Vacaciones
-            </a>
-            <a href="{% url 'reportes' %}" class="nav-item">
-                <i class="fa-solid fa-chart-line"></i> Reportes
-            </a>
-            <a href="#" class="nav-item">
-                <i class="fa-solid fa-gear"></i> Configuración
-            </a>
-            <a href="#" class="nav-item">
-                <i class="fa-regular fa-circle-question"></i> Ayuda
-            </a>
-        </nav>
-        <div class="sidebar-footer">
-            <div class="user-card">
-                <div class="user-avatar">GQ</div>
-                <div class="user-info">
-                    <strong>Lic. Gianina Quispe</strong>
-                    <span>Jefe de Área</span>
-                </div>
-                <i class="fa-solid fa-chevron-down"></i>
-            </div>
+
+        <div class="vac-header-right">
+            <button class="btn-year nav-arrow" id="prev-year" type="button">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <span class="year-display" id="year-display">{{ anio }}</span>
+            <button class="btn-year nav-arrow" id="next-year" type="button">
+                <i class="fa-solid fa-chevron-right"></i>
+            </button>
         </div>
-    </aside>
+    </div>
 
-    <main class="main">
-        <header class="topbar">
-            <div class="topbar-left">
-                <h1>Vacaciones</h1>
+    <div class="vac-warning">
+        <i class="fa-solid fa-circle-info"></i>
+        Consulta de vacaciones registradas y procesadas por administracion.
+    </div>
+
+    <div class="vac-layout">
+        <div class="vac-calendars" id="calendars-grid"></div>
+
+        <aside class="vac-panel">
+            <div class="vac-search-wrap">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" placeholder="Buscar personal..." id="staff-search">
             </div>
-            <div class="topbar-right">
-                <div class="notif-btn">
-                    <i class="fa-regular fa-bell"></i>
-                    <span class="notif-dot"></span>
-                </div>
-                <div class="topbar-date">
-                    <div class="date">Viernes, 24 de abril de 2026</div>
-                    <div class="time">12:30 PM</div>
-                </div>
-            </div>
-        </header>
 
-        <div class="content">
+            <div class="staff-list" id="staff-list"></div>
 
-            <!-- HEADER SECCIÓN -->
-            <div class="vac-header">
-                <div class="vac-header-left">
-                    <h2>Planificación Anual de Vacaciones - <span id="year-label">2027</span></h2>
-                    <div class="vac-filter-row">
-                        <div class="filter-group">
-                            <label>Área de trabajo</label>
-                            <div class="select-wrap">
-                                <select id="area-select">
-                                    <option>Sala 1A</option>
-                                    <option>Sala 1B</option>
-                                    <option>Sala 1C</option>
-                                    <option>Sala 2C</option>
-                                </select>
-                                <i class="fa-solid fa-chevron-down"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Sub-tabs -->
-                    <div class="vac-tabs">
-                        <button class="vac-tab active" data-tab="anual">Programación Anual</button>
-                        <button class="vac-tab" data-tab="saldo">Saldo y Días</button>
-                    </div>
-                </div>
-                <div class="vac-header-right">
-                    <button class="btn-year nav-arrow" id="prev-year"><i class="fa-solid fa-chevron-left"></i></button>
-                    <span class="year-display" id="year-display">2027</span>
-                    <button class="btn-year nav-arrow" id="next-year"><i class="fa-solid fa-chevron-right"></i></button>
+            <div class="vac-staff-card" id="staff-card">
+                <div class="staff-avatar" id="staff-avatar">--</div>
+                <div class="staff-info">
+                    <strong id="staff-name">Seleccione personal</strong>
+                    <span id="staff-role">Sin seleccionar</span>
                 </div>
             </div>
 
-            <!-- LAYOUT: calendarios + panel -->
-            <div class="vac-layout">
-
-                <!-- CALENDARIOS 4×3 -->
-                <div class="vac-calendars" id="calendars-grid">
-                    <!-- Generado por JS -->
+            <div class="vac-period-row">
+                <div class="vac-field-group">
+                    <label>Periodo de vacaciones:</label>
+                    <div class="vac-date-range">
+                        <input type="text" class="vac-date-input" id="date-from" placeholder="Inicio" readonly tabindex="-1">
+                        <span class="range-sep">a</span>
+                        <input type="text" class="vac-date-input" id="date-to" placeholder="Fin" readonly tabindex="-1">
+                    </div>
                 </div>
 
-                <!-- PANEL DERECHO -->
-                <aside class="vac-panel">
-
-                    <!-- Buscador -->
-                    <div class="vac-search-wrap">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                        <input type="text" placeholder="Buscar personal..." id="staff-search">
-                    </div>
-
-                    <!-- Tarjeta de personal seleccionado -->
-                    <div class="vac-staff-card" id="staff-card">
-                        <div class="staff-avatar" id="staff-avatar">VS</div>
-                        <div class="staff-info">
-                            <strong id="staff-name">Salgado Ortiz, Vanesa</strong>
-                            <span id="staff-role">Lic. de enfermería</span>
-                        </div>
-                    </div>
-
-                    <!-- Periodo y días -->
-                    <div class="vac-period-row">
-                        <div class="vac-field-group">
-                            <label>Periodo solicitado:</label>
-                            <div class="vac-date-range">
-                                <input type="text" class="vac-date-input" id="date-from" value="17 Enero" placeholder="Inicio">
-                                <span class="range-sep">a</span>
-                                <input type="text" class="vac-date-input" id="date-to" value="30 Enero" placeholder="Fin">
-                            </div>
-                        </div>
-                        <div class="vac-field-group">
-                            <label>Días:</label>
-                            <input type="text" class="vac-days-input" id="days-total" value="14" readonly>
-                        </div>
-                    </div>
-
-                    <!-- Estado -->
-                    <div class="vac-estado-row">
-                        <span class="estado-label">Estado actual:</span>
-                        <span class="estado-badge sin-programar" id="estado-badge">Sin programar</span>
-                    </div>
-
-                    <!-- Observaciones -->
-                    <div class="vac-obs-group">
-                        <label>Observaciones <span class="obs-optional">(opcional)</span></label>
-                        <textarea class="vac-obs-input" id="obs-input" placeholder="Agregar comentario..." maxlength="300"></textarea>
-                        <div class="obs-char-count"><span id="obs-count">0</span>/300</div>
-                    </div>
-
-                    <!-- Guardar -->
-                    <button class="btn-guardar">
-                        <i class="fa-solid fa-floppy-disk"></i> Guardar
-                    </button>
-
-                </aside>
-            </div>
-
-            <!-- LEYENDA -->
-            <div class="vac-legend">
-                <div class="legend-item">
-                    <span class="legend-dot ocupado"></span> Ocupado
-                </div>
-                <div class="legend-item">
-                    <span class="legend-dot seleccionado"></span> Seleccionado
-                </div>
-                <div class="legend-item">
-                    <span class="legend-dot libre"></span> Libre
+                <div class="vac-field-group">
+                    <label>Días:</label>
+                    <input type="text" class="vac-days-input" id="days-total" value="0" readonly tabindex="-1">
                 </div>
             </div>
 
-        </div><!-- /content -->
-    </main>
+            <div class="vac-estado-row">
+                <span class="estado-label">Estado actual:</span>
+                <span class="estado-badge sin-programar" id="estado-badge">Sin programar</span>
+            </div>
 
+            <div class="vac-obs-group">
+                <label>Observaciones <span class="obs-optional">(opcional)</span></label>
+                <textarea class="vac-obs-input" id="obs-input" placeholder="Sin observaciones" maxlength="300" readonly tabindex="-1"></textarea>
+                <div class="obs-char-count"><span id="obs-count">0</span>/300</div>
+            </div>
+
+        </aside>
+    </div>
+
+    <div class="vac-legend">
+        <div class="legend-item">
+            <span class="legend-dot ocupado"></span> Vacaciones programadas
+        </div>
+        <div class="legend-item">
+            <span class="legend-dot seleccionado"></span> Seleccionado
+        </div>
+        <div class="legend-item">
+            <span class="legend-dot libre"></span> Libre
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
 <script src="{% static 'js/vacaciones.js' %}"></script>
-</body>
-</html>
+{% endblock %}

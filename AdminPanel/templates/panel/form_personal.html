@@ -1,0 +1,226 @@
+{% extends 'panel/base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if es_edicion %}Editar personal{% else %}Agregar personal{% endif %} – Panel Administrativo
+{% endblock %}
+{% block nav_personal %}active{% endblock %}
+{% block breadcrumb %}
+    {% if es_edicion %}Editar personal{% else %}Agregar personal{% endif %}
+{% endblock %}
+{% block page_title %}
+    {% if es_edicion %}Editar trabajador{% else %}Nuevo trabajador{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'panel/css/personal.css' %}">
+{% endblock %}
+
+{% block page_actions %}
+    <a href="{% url 'admin_personal' %}" class="btn btn-ghost btn-sm">
+        <i class="fa-solid fa-arrow-left"></i> Volver a la lista
+    </a>
+{% endblock %}
+
+{% block content %}
+
+    {# data-* para que personal.js lea las URLs sin hardcodearlas #}
+    <form method="post" novalidate id="form-personal"
+          data-url-areas="{% url 'admin_api_areas' %}"
+          data-url-salas="{% url 'admin_api_salas' %}">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="alert alert-error" style="margin-bottom:20px">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                {{ form.non_field_errors }}
+                <button class="alert-close" type="button" onclick="this.parentElement.remove()">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        {% endif %}
+
+        <div class="form-grid">
+
+            {# ── Datos generales ── #}
+            <div class="form-section card">
+                <div class="card-header">
+                    <span class="card-title">
+                        <i class="fa-solid fa-circle-user"></i>
+                        Datos generales
+                    </span>
+                </div>
+                <div class="card-body form-fields">
+
+                    <div class="form-row-2">
+                        <div class="field-group {% if form.nombre.errors %}field-error{% endif %}">
+                            <label for="{{ form.nombre.id_for_label }}">
+                                Nombre <span class="required">*</span>
+                            </label>
+                            {{ form.nombre }}
+                            {% if form.nombre.errors %}
+                                <span class="field-msg error">{{ form.nombre.errors.0 }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="field-group {% if form.apellidos.errors %}field-error{% endif %}">
+                            <label for="{{ form.apellidos.id_for_label }}">
+                                Apellidos <span class="required">*</span>
+                            </label>
+                            {{ form.apellidos }}
+                            {% if form.apellidos.errors %}
+                                <span class="field-msg error">{{ form.apellidos.errors.0 }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-row-2">
+                        <div class="field-group {% if form.dni.errors %}field-error{% endif %}">
+                            <label for="{{ form.dni.id_for_label }}">
+                                DNI <span class="required">*</span>
+                            </label>
+                            {{ form.dni }}
+                            {% if form.dni.errors %}
+                                <span class="field-msg error">{{ form.dni.errors.0 }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="field-group {% if form.email.errors %}field-error{% endif %}">
+                            <label for="{{ form.email.id_for_label }}">
+                                Email institucional <span class="required">*</span>
+                            </label>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                                <span class="field-msg error">{{ form.email.errors.0 }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-row-2">
+                        <div class="field-group {% if form.telefono.errors %}field-error{% endif %}">
+                            <label for="{{ form.telefono.id_for_label }}">Teléfono</label>
+                            {{ form.telefono }}
+                            {% if form.telefono.errors %}
+                                <span class="field-msg error">{{ form.telefono.errors.0 }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="field-group {% if form.condicion.errors %}field-error{% endif %}">
+                            <label for="{{ form.condicion.id_for_label }}">Condición</label>
+                            {{ form.condicion }}
+                            {% if form.condicion.errors %}
+                                <span class="field-msg error">{{ form.condicion.errors.0 }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-row-2">
+                        <div class="field-group {% if form.fecha_nacimiento.errors %}field-error{% endif %}">
+                            <label for="{{ form.fecha_nacimiento.id_for_label }}">Fecha de nacimiento</label>
+                            {{ form.fecha_nacimiento }}
+                            {% if form.fecha_nacimiento.errors %}
+                                <span class="field-msg error">{{ form.fecha_nacimiento.errors.0 }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="field-group {% if form.fecha_ingreso.errors %}field-error{% endif %}">
+                            <label for="{{ form.fecha_ingreso.id_for_label }}">Fecha de ingreso</label>
+                            {{ form.fecha_ingreso }}
+                            {% if form.fecha_ingreso.errors %}
+                                <span class="field-msg error">{{ form.fecha_ingreso.errors.0 }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            {# ── Rol y ubicación ── #}
+            <div class="form-section card">
+                <div class="card-header">
+                    <span class="card-title">
+                        <i class="fa-solid fa-id-badge"></i>
+                        Rol y ubicación
+                    </span>
+                </div>
+                <div class="card-body form-fields">
+
+                    <div class="form-row-2">
+                        <div class="field-group {% if form.rol.errors %}field-error{% endif %}">
+                            <label for="{{ form.rol.id_for_label }}">
+                                Rol <span class="required">*</span>
+                            </label>
+                            {{ form.rol }}
+                            {% if form.rol.errors %}
+                                <span class="field-msg error">{{ form.rol.errors.0 }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="field-group {% if form.tipo_trabajador.errors %}field-error{% endif %}">
+                            <label for="{{ form.tipo_trabajador.id_for_label }}">Tipo de trabajador</label>
+                            {{ form.tipo_trabajador }}
+                            {% if form.tipo_trabajador.errors %}
+                                <span class="field-msg error">{{ form.tipo_trabajador.errors.0 }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="field-group {% if form.departamento.errors %}field-error{% endif %}">
+                        <label for="{{ form.departamento.id_for_label }}">Departamento</label>
+                        {{ form.departamento }}
+                        {% if form.departamento.errors %}
+                            <span class="field-msg error">{{ form.departamento.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-row-2">
+                        <div class="field-group {% if form.area.errors %}field-error{% endif %}">
+                            <label for="{{ form.area.id_for_label }}">Área</label>
+                            {{ form.area }}
+                            {% if form.area.errors %}
+                                <span class="field-msg error">{{ form.area.errors.0 }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="field-group {% if form.sala.errors %}field-error{% endif %}">
+                            <label for="{{ form.sala.id_for_label }}">Sala</label>
+                            {{ form.sala }}
+                            {% if form.sala.errors %}
+                                <span class="field-msg error">{{ form.sala.errors.0 }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if es_edicion %}
+                    <label class="status-toggle">
+                        {{ form.is_active }}
+                        <span>Usuario activo y habilitado para acceder al sistema</span>
+                    </label>
+                    {% endif %}
+
+                    {% if not es_edicion %}
+                    <div class="field-msg info">
+                        <i class="fa-solid fa-circle-info"></i>
+                        La contraseña inicial será el DNI del trabajador.
+                    </div>
+                    {% endif %}
+
+                </div>
+            </div>
+
+        </div>
+
+        <div class="form-footer-bar">
+            <a href="{% url 'admin_personal' %}" class="btn btn-ghost">
+                <i class="fa-solid fa-xmark"></i> Cancelar
+            </a>
+            <button type="submit" class="btn btn-primary">
+                {% if es_edicion %}
+                    <i class="fa-solid fa-floppy-disk"></i> Guardar cambios
+                {% else %}
+                    <i class="fa-solid fa-user-plus"></i> Agregar trabajador
+                {% endif %}
+            </button>
+        </div>
+
+    </form>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'panel/js/personal.js' %}"></script>
+{% endblock %}

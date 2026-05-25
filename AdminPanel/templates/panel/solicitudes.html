@@ -1,0 +1,45 @@
+{% extends 'panel/base.html' %}
+{% load static %}
+
+{% block title %}Solicitudes - Panel Administrativo{% endblock %}
+{% block nav_solicitudes %}active{% endblock %}
+{% block breadcrumb %}Solicitudes{% endblock %}
+{% block page_title %}Solicitudes para procesar{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'panel/css/solicitudes.css' %}">{% endblock %}
+
+{% block content %}
+<form method="get" class="request-toolbar">
+    <div class="request-search">
+        <input class="form-control" type="text" name="buscar" value="{{ buscar }}" placeholder="Buscar por personal o DNI">
+    </div>
+    <nav class="request-tabs">
+        <a class="{% if estado_actual == 'aprobado_jefe' %}active{% endif %}" href="?estado=aprobado_jefe&buscar={{ buscar }}">Pendientes</a>
+        <a class="{% if estado_actual == 'procesado' %}active{% endif %}" href="?estado=procesado&buscar={{ buscar }}">Aprobadas</a>
+        <a class="{% if estado_actual == 'rechazado_admin' %}active{% endif %}" href="?estado=rechazado_admin&buscar={{ buscar }}">Rechazadas</a>
+    </nav>
+    <button class="btn btn-secondary" type="submit">Filtrar</button>
+</form>
+<div class="card request-list">
+    {% if solicitudes_lista %}
+    <div class="table-wrapper">
+        <table class="table">
+            <thead><tr><th>Solicitante</th><th>Solicitud</th><th>Periodo</th><th>Revision del jefe</th><th>Estado</th><th></th></tr></thead>
+            <tbody>
+            {% for item in solicitudes_lista %}
+            <tr>
+                <td><strong>{{ item.sol.solicitante.apellidos }}, {{ item.sol.solicitante.nombre }}</strong><span class="cell-sub">{{ item.sol.solicitante.cargo_display }}</span></td>
+                <td>{{ item.tipo_label }}</td>
+                <td>{{ item.sol.fecha_inicio|date:"d/m/Y" }} - {{ item.sol.fecha_fin|date:"d/m/Y"|default:"En curso" }}</td>
+                <td>{% if item.sol.revisado_por %}{{ item.sol.revisado_por.nombre_completo }}{% else %}-{% endif %}</td>
+                <td>{% if item.sol.estado == 'aprobado_jefe' %}<span class="badge badge-warning">Pendiente</span>{% elif item.sol.estado == 'procesado' %}<span class="badge badge-success">Aprobada</span>{% else %}<span class="badge badge-danger">Rechazada</span>{% endif %}</td>
+                <td><a class="btn btn-secondary btn-sm" href="{% url 'admin_detalle_solicitud' item.tipo item.sol.id %}">Ver detalle</a></td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="request-empty"><i class="fa-regular fa-folder-open"></i><p>No hay solicitudes para este filtro.</p></div>
+    {% endif %}
+</div>
+{% endblock %}

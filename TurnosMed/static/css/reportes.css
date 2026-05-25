@@ -61,6 +61,7 @@
     width: 100%;
     transition: background .15s, border-color .15s;
     font-family: inherit;
+    text-decoration: none;
 }
 
 .rep-cat:hover:not(.disabled) {

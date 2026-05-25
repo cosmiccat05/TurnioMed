@@ -1,0 +1,118 @@
+{% load static %}
+<!-- Volver -->
+<a href="{% url 'solicitudes' %}" class="detail-back">
+    <i class="fa-solid fa-arrow-left"></i> Volver a la lista
+</a>
+
+<!-- Header — título dinámico según subtipo -->
+<div class="detail-header">
+    <div class="detail-avatar vac-avatar">{{ solicitante_iniciales }}</div>
+    <div class="detail-header-info">
+        {% if sol.tipo == 'adelanto' %}
+            <h2>Solicitud de adelanto de vacaciones</h2>
+        {% elif sol.tipo == 'cambio' %}
+            <h2>Solicitud de cambio de fecha de vacaciones</h2>
+        {% else %}
+            <h2>Solicitud de vacaciones</h2>
+        {% endif %}
+        <span>{{ sol.solicitante.apellidos }}, {{ sol.solicitante.nombre }}</span>
+        <span class="detail-specialty">{{ sol.solicitante.cargo_display }}</span>
+    </div>
+    <div class="detail-header-right">
+        <span class="badge-status {{ sol.estado }}">{{ sol.get_estado_display }}</span>
+        <span class="detail-submitted">
+            Solicitado el<br>
+            {{ sol.fecha_solicitud|date:"d M, Y - h:i A" }}
+        </span>
+    </div>
+</div>
+
+<!-- Cuerpo: 2 columnas -->
+<div class="detail-body cols-2">
+
+    <!-- Col 1: Detalles -->
+    <div class="detail-col">
+        <div class="detail-col-title">Detalles de la solicitud</div>
+
+        <!-- Periodo -->
+        <div class="detail-block">
+            <div class="detail-block-label">
+                <i class="fa-regular fa-calendar-days"></i>
+                Periodo solicitado
+            </div>
+            <div class="detail-period-row">
+                <span class="period-dot {% if sol.estado == 'aprobado_jefe' or sol.estado == 'procesado' %}approved{% endif %}"></span>
+                <div>
+                    <div class="period-label">Período</div>
+                    <div class="period-dates">
+                        Desde {{ sol.fecha_inicio|date:"d/m/Y" }}
+                        hasta {{ sol.fecha_fin|date:"d/m/Y" }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tarjetas resumen -->
+        <div class="vac-info-grid">
+            <div class="vac-info-card">
+                <span class="vac-info-label">Días solicitados</span>
+                <span class="vac-info-value highlight">{{ dias_totales }} días</span>
+            </div>
+            <div class="vac-info-card">
+                <span class="vac-info-label">Tipo</span>
+                <span class="vac-info-value">{{ sol.get_tipo_display }}</span>
+            </div>
+        </div>
+
+        <!-- Alerta solo para adelanto -->
+        {% if sol.tipo == 'adelanto' %}
+        <div class="vac-alert">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            Esta solicitud es un <strong>adelanto de vacaciones</strong>.
+            Verifique que el saldo acumulado cubra los días solicitados.
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Col 2: Motivo + historial -->
+    <div class="detail-col">
+        <div class="detail-col-title">Motivo de la solicitud</div>
+        <p class="detail-reason">{{ sol.motivo }}</p>
+
+        {% if historial %}
+        <div class="detail-col-title" style="margin-top:20px">Historial reciente</div>
+        <div class="vac-history">
+            {% for h in historial %}
+            <div class="vac-history-row">
+                <span class="vac-history-dates">
+                    {{ h.fecha_inicio|date:"d M" }} – {{ h.fecha_fin|date:"d M, Y" }}
+                </span>
+                <span class="vac-history-days">{{ h.dias_totales }} días</span>
+                <span class="badge-status {{ h.estado }}">{{ h.get_estado_display }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<!-- Acciones -->
+<div class="detail-actions">
+    {% if sol.estado == 'pendiente' %}
+    <button class="btn-reject"
+            onclick="accionSolicitud('rechazar', 'vacaciones', {{ sol.id }})">
+        <i class="fa-solid fa-xmark"></i> Rechazar
+    </button>
+    <button class="btn-accept"
+            onclick="accionSolicitud('aprobar', 'vacaciones', {{ sol.id }})">
+        <i class="fa-solid fa-check"></i> Aceptar
+    </button>
+
+    {% else %}
+    <span class="badge-status {{ sol.estado }}" style="font-size:13px; padding:8px 16px">
+        {{ sol.get_estado_display }}
+        {% if sol.revisado_por %} - {{ sol.revisado_por.nombre }} {{ sol.revisado_por.apellidos }}{% endif %}
+    </span>
+    {% endif %}
+</div>

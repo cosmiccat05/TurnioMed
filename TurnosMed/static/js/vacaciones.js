@@ -1,40 +1,57 @@
-let currentYear = 2027;
-
-const OCCUPIED = {
-    2026: {
-    0: [1, 2, 3, 15, 16, 17, 18], // Enero 2026
-    6: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], // Julio 2026 (15 días)
-    11: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30] // Diciembre (Mes completo)
-    },
-
-    2027: {
-        0: [],
-    }
-};
-
-// Objeto para guardar el rango seleccionado
-let rangeSelection = {
-    start: null, // { month, day }
-    end: null    // { month, day }
-};
-
 const MONTHS = [
-    'Enero','Febrero','Marzo','Abril','Mayo','Junio',
-    'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'
+    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
 ];
-const DAYS_HEADER = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+const DAYS_HEADER = ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'];
 
-/* ─── Render calendarios ───────────────────── */
-function buildCalendars(year) {
-    const grid = document.getElementById('calendars-grid');
-    grid.innerHTML = '';
-    for (let m = 0; m < 12; m++) {
-        grid.appendChild(buildMonth(year, m));
-    }
+const page = document.querySelector('.vac-page');
+const currentYear = Number(page?.dataset.anio || new Date().getFullYear());
+const personalData = JSON.parse(document.getElementById('personal-data')?.textContent || '[]');
+const vacacionesData = JSON.parse(document.getElementById('vacaciones-data')?.textContent || '[]');
+let selectedWorker = null;
+
+function parseISODate(value) {
+    const [year, month, day] = value.split('-').map(Number);
+    return new Date(year, month - 1, day);
 }
 
-function buildMonth(year, month) {
-    const occ = (OCCUPIED[year] || {})[month] || [];
+function formatShortDate(date) {
+    return `${date.getDate()} ${MONTHS[date.getMonth()]}`;
+}
+
+function getPeriodosTrabajador(trabajadorId) {
+    return vacacionesData.filter(item => Number(item.trabajador_id) === Number(trabajadorId));
+}
+
+function getPeriodoPrincipal(trabajadorId) {
+    const periodos = getPeriodosTrabajador(trabajadorId);
+    return periodos.find(item => item.tipo === 'programacion') || periodos[0];
+}
+
+function getOccupiedDays() {
+    const occupied = {};
+    vacacionesData.forEach(item => {
+        const start = parseISODate(item.fecha_inicio);
+        const end = parseISODate(item.fecha_fin);
+        for (let date = new Date(start); date <= end; date.setDate(date.getDate() + 1)) {
+            if (date.getFullYear() !== currentYear) continue;
+            const month = date.getMonth();
+            if (!occupied[month]) occupied[month] = [];
+            occupied[month].push(date.getDate());
+        }
+    });
+    return occupied;
+}
+
+function isSelectedWorkerDay(month, day) {
+    if (!selectedWorker) return false;
+    const current = new Date(currentYear, month, day);
+    return getPeriodosTrabajador(selectedWorker.id).some(item => (
+        current >= parseISODate(item.fecha_inicio) && current <= parseISODate(item.fecha_fin)
+    ));
+}
+
+function buildMonth(month, occupied) {
     const card = document.createElement('div');
     card.className = 'cal-card';
 
@@ -43,128 +60,127 @@ function buildMonth(year, month) {
     title.textContent = MONTHS[month];
     card.appendChild(title);
 
-    const hdr = document.createElement('div');
-    hdr.className = 'cal-grid';
-    DAYS_HEADER.forEach(d => {
+    const grid = document.createElement('div');
+    grid.className = 'cal-grid';
+    DAYS_HEADER.forEach(day => {
         const cell = document.createElement('div');
         cell.className = 'cal-day-hdr';
-        cell.textContent = d;
-        hdr.appendChild(cell);
+        cell.textContent = day;
+        grid.appendChild(cell);
     });
 
-    const firstDay = new Date(year, month, 1).getDay();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-    for (let i = 0; i < firstDay; i++) {
+    const firstDay = new Date(currentYear, month, 1).getDay();
+    const daysInMonth = new Date(currentYear, month + 1, 0).getDate();
+    for (let index = 0; index < firstDay; index++) {
         const blank = document.createElement('div');
         blank.className = 'cal-cell other-month';
-        hdr.appendChild(blank);
+        grid.appendChild(blank);
     }
 
-    for (let d = 1; d <= daysInMonth; d++) {
+    for (let day = 1; day <= daysInMonth; day++) {
         const cell = document.createElement('div');
         cell.className = 'cal-cell';
-        cell.textContent = d;
-        cell.dataset.month = month;
-        cell.dataset.day = d;
-
-        if (occ.includes(d)) cell.classList.add('ocupado');
-
-        // Verificar si este día cae dentro del rango seleccionado para pintarlo
-        if (isDayInRange(month, d)) {
-            cell.classList.add('seleccionado');
-        }
-
-        cell.addEventListener('click', () => handleDateClick(month, d));
-        hdr.appendChild(cell);
+        cell.textContent = day;
+        if ((occupied[month] || []).includes(day)) cell.classList.add('ocupado');
+        if (isSelectedWorkerDay(month, day)) cell.classList.add('seleccionado');
+        grid.appendChild(cell);
     }
 
-    card.appendChild(hdr);
+    card.appendChild(grid);
     return card;
 }
 
-/* ─── Lógica de Selección de Rango ─────────── */
-function handleDateClick(month, day) {
-    // Si el año es 2026, bloqueamos la edición
-    if (currentYear === 2026) {
-        alert("La programación para el año 2026 ya está cerrada. El cambio debe ser realizado mediante Solicitudes.");
-        return;
+function buildCalendars() {
+    const grid = document.getElementById('calendars-grid');
+    if (!grid) return;
+    const occupied = getOccupiedDays();
+    grid.innerHTML = '';
+    for (let month = 0; month < 12; month++) {
+        grid.appendChild(buildMonth(month, occupied));
     }
+}
 
-    const occ = (OCCUPIED[currentYear] || {})[month] || [];
-    if (occ.includes(day)) return; // No permitir seleccionar días ocupados
+function updateObsCounter() {
+    const obsInput = document.getElementById('obs-input');
+    const obsCount = document.getElementById('obs-count');
+    if (obsInput && obsCount) obsCount.textContent = obsInput.value.length;
+}
 
-    const clickedDate = new Date(currentYear, month, day);
+function selectWorker(workerId) {
+    selectedWorker = personalData.find(item => Number(item.id) === Number(workerId));
+    if (!selectedWorker) return;
 
-    if (!rangeSelection.start || (rangeSelection.start && rangeSelection.end)) {
-        // Primer clic o reinicio de selección
-        rangeSelection.start = { month, day, date: clickedDate };
-        rangeSelection.end = null;
+    const periodo = getPeriodoPrincipal(workerId);
+    const badge = document.getElementById('estado-badge');
+    const observations = document.getElementById('obs-input');
+
+    document.getElementById('staff-avatar').textContent = selectedWorker.iniciales;
+    document.getElementById('staff-name').textContent = selectedWorker.nombre;
+    document.getElementById('staff-role').textContent = selectedWorker.cargo;
+
+    if (periodo) {
+        document.getElementById('date-from').value = formatShortDate(parseISODate(periodo.fecha_inicio));
+        document.getElementById('date-to').value = formatShortDate(parseISODate(periodo.fecha_fin));
+        document.getElementById('days-total').value = periodo.dias_totales;
+        badge.textContent = periodo.tipo === 'adelanto' ? 'Adelanto procesado' : 'Programado';
+        badge.className = 'estado-badge programado';
+        observations.value = periodo.observaciones || '';
     } else {
-        // Segundo clic: definir el fin del rango
-        if (clickedDate < rangeSelection.start.date) {
-            // Si el segundo clic es antes que el primero, invertimos
-            rangeSelection.end = rangeSelection.start;
-            rangeSelection.start = { month, day, date: clickedDate };
-        } else {
-            rangeSelection.end = { month, day, date: clickedDate };
-        }
+        document.getElementById('date-from').value = '';
+        document.getElementById('date-to').value = '';
+        document.getElementById('days-total').value = 0;
+        badge.textContent = 'Sin programar';
+        badge.className = 'estado-badge sin-programar';
+        observations.value = '';
     }
-
-    updateUI();
+    updateObsCounter();
+    buildCalendars();
 }
 
-function isDayInRange(m, d) {
-    if (!rangeSelection.start) return false;
-    const current = new Date(currentYear, m, d);
-    if (rangeSelection.end) {
-        return current >= rangeSelection.start.date && current <= rangeSelection.end.date;
-    }
-    return current.getTime() === rangeSelection.start.date.getTime();
+function renderStaffList() {
+    const list = document.getElementById('staff-list');
+    if (!list) return;
+    list.innerHTML = '';
+    personalData.forEach(persona => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'staff-option';
+        button.dataset.id = persona.id;
+        button.innerHTML = `
+            <span class="staff-option-avatar">${persona.iniciales}</span>
+            <span class="staff-option-info">
+                <strong>${persona.nombre}</strong>
+                <small>${persona.cargo}</small>
+            </span>
+        `;
+        button.addEventListener('click', () => {
+            document.querySelectorAll('.staff-option').forEach(item => item.classList.remove('active'));
+            button.classList.add('active');
+            selectWorker(persona.id);
+        });
+        list.appendChild(button);
+    });
 }
 
-function updateUI() {
-    buildCalendars(currentYear);
-
-    if (rangeSelection.start) {
-        document.getElementById('date-from').value = `${rangeSelection.start.day} ${MONTHS[rangeSelection.start.month]}`;
-
-        if (rangeSelection.end) {
-            document.getElementById('date-to').value = `${rangeSelection.end.day} ${MONTHS[rangeSelection.end.month]}`;
-
-            // Calcular diferencia de días
-            const diffTime = Math.abs(rangeSelection.end.date - rangeSelection.start.date);
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-            document.getElementById('days-total').value = diffDays;
-        } else {
-            document.getElementById('date-to').value = "---";
-            document.getElementById('days-total').value = 1;
-        }
-    }
+function navigateYear(year) {
+    const params = new URLSearchParams(window.location.search);
+    params.set('anio', year);
+    window.location.search = params.toString();
 }
 
-/* ─── Navegación año ──────────────────────── */
-document.getElementById('prev-year').addEventListener('click', () => {
-    currentYear--;
-    resetAndRefresh();
-});
-document.getElementById('next-year').addEventListener('click', () => {
-    currentYear++;
-    resetAndRefresh();
-});
-
-function resetAndRefresh() {
-    rangeSelection = { start: null, end: null };
+function initVacaciones() {
+    document.getElementById('prev-year')?.addEventListener('click', () => navigateYear(currentYear - 1));
+    document.getElementById('next-year')?.addEventListener('click', () => navigateYear(currentYear + 1));
     document.getElementById('year-display').textContent = currentYear;
     document.getElementById('year-label').textContent = currentYear;
-    document.getElementById('date-from').value = "";
-    document.getElementById('date-to').value = "";
-    document.getElementById('days-total').value = 0;
-    buildCalendars(currentYear);
+    document.getElementById('staff-search')?.addEventListener('input', function () {
+        const query = this.value.toLowerCase();
+        document.querySelectorAll('.staff-option').forEach(item => {
+            item.style.display = item.textContent.toLowerCase().includes(query) ? '' : 'none';
+        });
+    });
+    renderStaffList();
+    buildCalendars();
 }
 
-/* ─── Init ────────────────────────────────── */
-// Iniciamos con los valores limpios para 2027
-updateUI();
-document.getElementById('year-display').textContent = currentYear;
-document.getElementById('year-label').textContent = currentYear;
+document.addEventListener('DOMContentLoaded', initVacaciones);

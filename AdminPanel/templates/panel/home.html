@@ -1,0 +1,212 @@
+<!--home-->
+{% extends 'panel/base.html' %}
+{% load static %}
+
+{% block title %}Inicio – Panel Administrativo{% endblock %}
+{% block nav_home %}active{% endblock %}
+{% block breadcrumb %}Inicio{% endblock %}
+{% block page_header %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'panel/css/home.css' %}">
+{% endblock %}
+
+{% block content %}
+
+    <!-- Banner de bienvenida -->
+    <div class="welcome-banner">
+        <div class="welcome-text">
+            <h2>Bienvenid@, {{ request.user.nombre_completo }}</h2>
+            <p>{{ request.user.cargo_display }} · Panel Administrativo</p>
+        </div>
+        <div class="welcome-meta">
+            <div class="wdate">{{ hoy|date:"l, d \d\e F" }}</div>
+            <div class="wtime" id="relojHome">--:--</div>
+        </div>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="stats-grid">
+
+        <div class="stat-card">
+            <div class="stat-icon indigo">
+                <i class="fa-solid fa-file-pen"></i>
+            </div>
+            <div class="stat-body">
+                <div class="stat-label">Solicitudes pendientes</div>
+                <div class="stat-value">{{ total_pendientes|default:"0" }}</div>
+                <div class="stat-sub">
+                    <span class="warn">requieren tu aprobación</span>
+                </div>
+                <a href="{% url 'admin_solicitudes' %}" class="stat-link">
+                    Revisar solicitudes <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon teal">
+                <i class="fa-solid fa-user-group"></i>
+            </div>
+            <div class="stat-body">
+                <div class="stat-label">Total de trabajadores</div>
+                <div class="stat-value">{{ total_trabajadores|default:"0" }}</div>
+                <div class="stat-sub">
+                    <span class="extra">{{ trabajadores_activos|default:"0" }} activos</span>
+                </div>
+                <a href="{% url 'admin_personal' %}" class="stat-link">
+                    Ver personal <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon amber">
+                <i class="fa-solid fa-umbrella-beach"></i>
+            </div>
+            <div class="stat-body">
+                <div class="stat-label">En vacaciones ahora</div>
+                <div class="stat-value">{{ en_vacaciones|default:"0" }}</div>
+                <div class="stat-sub">
+                    {% if proximos_vacaciones %}
+                        <span class="warn">{{ proximos_vacaciones }} próximos a salir</span>
+                    {% else %}
+                        <span>sin salidas próximas</span>
+                    {% endif %}
+                </div>
+                <a href="{% url 'admin_vacaciones' %}" class="stat-link">
+                    Ver programación <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Fila inferior: tabla próximos a vacaciones + actividad reciente -->
+    <div class="home-grid">
+
+        <!-- Próximos a salir de vacaciones -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">
+                    <i class="fa-solid fa-plane-departure"></i>
+                    Próximos a salir de vacaciones
+                </span>
+                <a href="{% url 'admin_vacaciones' %}" class="btn btn-ghost btn-sm">Ver todos</a>
+            </div>
+            <div class="card-body no-pad">
+                {% if proximos_lista %}
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Trabajador</th>
+                                <th>Cargo</th>
+                                <th>Fecha inicio</th>
+                                <th>Días</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in proximos_lista %}
+                            <tr>
+                                <td>
+                                    <div class="person-info">
+                                        <div class="person-avatar">
+                                            {{ item.trabajador.nombre|first|upper }}{{ item.trabajador.apellidos|first|upper }}
+                                        </div>
+                                        <div>
+                                            <div class="person-name">{{ item.trabajador.apellidos }}, {{ item.trabajador.nombre }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="text-secondary">{{ item.trabajador.cargo_display }}</td>
+                                <td>
+                                    <span class="date-chip">
+                                        <i class="fa-regular fa-calendar"></i>
+                                        {{ item.fecha_inicio|date:"d M" }}
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                        <span class="dias-chip">{{ item.dias_totales }} d</span>
+                                </td>
+                                <td>
+                                    <span class="badge badge-success">{{ item.estado_display }}</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fa-regular fa-calendar-check"></i>
+                        <p>No hay personal próximo a salir de vacaciones.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Actividad reciente de solicitudes -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    Actividad reciente
+                </span>
+                <a href="{% url 'admin_solicitudes' %}" class="btn btn-ghost btn-sm">Ver bandeja</a>
+            </div>
+            <div class="card-body no-pad">
+                {% if actividad_reciente %}
+                    <ul class="activity-list">
+                        {% for act in actividad_reciente %}
+                        <li class="activity-item">
+                            <div class="activity-dot
+                                {% if act.estado == 'procesado' %}dot-green
+                                {% elif act.estado == 'rechazado_admin' %}dot-red
+                                {% else %}dot-yellow{% endif %}">
+                            </div>
+                            <div class="activity-body">
+                                <div class="activity-title">
+                                    {{ act.trabajador.nombre_completo }}
+                                    <span class="activity-type">· {{ act.tipo_display }}</span>
+                                </div>
+                                <div class="activity-meta">
+                                    {% if act.estado == 'procesado' %}
+                                        <span class="badge badge-success">Aprobado</span>
+                                    {% elif act.estado == 'rechazado_admin' %}
+                                        <span class="badge badge-danger">Rechazado</span>
+                                    {% else %}
+                                        <span class="badge badge-warning">Pendiente</span>
+                                    {% endif %}
+                                    <span class="activity-date">{{ act.fecha_actualizacion|date:"d M, H:i" }}</span>
+                                </div>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fa-regular fa-inbox"></i>
+                        <p>No hay actividad reciente registrada.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Reloj secundario del banner (sincronizado con base.js)
+    function tickHome() {
+        const now = new Date();
+        const h = String(now.getHours()).padStart(2,'0');
+        const m = String(now.getMinutes()).padStart(2,'0');
+        const el = document.getElementById('relojHome');
+        if (el) el.textContent = `${h}:${m}`;
+    }
+    tickHome();
+    setInterval(tickHome, 60000);
+</script>
+{% endblock %}

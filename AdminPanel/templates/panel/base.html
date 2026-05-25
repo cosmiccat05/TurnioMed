@@ -1,0 +1,160 @@
+{% load static %}
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AdminPanel – TurnioMed{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'panel/css/base.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <aside class="sidebar">
+
+        <div class="sidebar-logo">
+            <div class="logo-icon">
+                <img src="{% static 'img/logo.png' %}" alt="Logo TurnioMed">
+            </div>
+            <div class="logo-text">
+                <span>Panel Administrativo</span>
+                <strong>TurnioMed</strong>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+
+            <a href="{% url 'admin_home' %}" class="nav-item {% block nav_home %}{% endblock %}">
+                <i class="fa-solid fa-house"></i>
+                <span>Inicio</span>
+            </a>
+
+            <div class="nav-divider"></div>
+
+            <a href="{% url 'admin_personal' %}" class="nav-item {% block nav_personal %}{% endblock %}">
+                <i class="fa-solid fa-user-group"></i>
+                <span>Personal</span>
+            </a>
+            <a href="{% url 'admin_solicitudes' %}" class="nav-item {% block nav_solicitudes %}{% endblock %}">
+                <i class="fa-solid fa-inbox"></i>
+                <span>Solicitudes</span>
+                {% if total_pendientes %}
+                    <span class="nav-badge">{{ total_pendientes }}</span>
+                {% endif %}
+            </a>
+            <a href="{% url 'admin_vacaciones' %}" class="nav-item {% block nav_vacaciones %}{% endblock %}">
+                <i class="fa-solid fa-umbrella-beach"></i>
+                <span>Vacaciones</span>
+            </a>
+
+            <div class="nav-divider"></div>
+
+            <a href="#" class="nav-item">
+                <i class="fa-solid fa-gear"></i>
+                <span>Configuración</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fa-regular fa-circle-question"></i>
+                <span>Ayuda</span>
+            </a>
+
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-card" id="userCard">
+                <div class="user-dropdown" id="userDropdown">
+                    <a href="#" class="dropdown-item">
+                        <i class="fa-solid fa-circle-user"></i> Mi perfil
+                    </a>
+                    <hr>
+                    <a href="{% url 'logout' %}" class="dropdown-item logout-text">
+                        <i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión
+                    </a>
+                </div>
+
+                <div class="user-avatar">
+                    {{ request.user.nombre|first|upper }}{{ request.user.apellidos|first|upper }}
+                </div>
+                <div class="user-info">
+                    <strong>{{ request.user.nombre_completo }}</strong>
+                    <span>{{ request.user.cargo_display }}</span>
+                </div>
+                <i class="fa-solid fa-chevron-up user-chevron" id="userChevron"></i>
+            </div>
+        </div>
+
+    </aside>
+
+    <main class="main">
+
+        <header class="topbar">
+            <div class="topbar-left">
+                <button class="sidebar-toggle" id="sidebarToggle" aria-label="Alternar menú">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <div class="breadcrumb">
+                    <span class="breadcrumb-root">Admin</span>
+                    <i class="fa-solid fa-chevron-right breadcrumb-sep"></i>
+                    <span class="breadcrumb-current">{% block breadcrumb %}Inicio{% endblock %}</span>
+                </div>
+            </div>
+            <div class="topbar-right">
+                <button class="icon-btn notif-btn" aria-label="Notificaciones">
+                    <i class="fa-regular fa-bell"></i>
+                    <span class="notif-dot"></span>
+                </button>
+                <div class="topbar-date">
+                    <div class="date">{{ hoy|date:"d \d\e F, Y" }}</div>
+                    <div class="time" id="reloj">--:--</div>
+                </div>
+                <div class="topbar-divider"></div>
+                <div class="topbar-role-badge">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <span>Administrador</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="content">
+            {% block page_header %}
+            <div class="page-header">
+                <h1>{% block page_title %}{% endblock %}</h1>
+                <div class="page-actions">{% block page_actions %}{% endblock %}</div>
+            </div>
+            {% endblock %}
+
+            {% if messages %}
+                <div class="alert-stack">
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }}">
+                            <i class="fa-solid
+                                {% if message.tags == 'success' %}fa-circle-check
+                                {% elif message.tags == 'error' %}fa-circle-exclamation
+                                {% elif message.tags == 'warning' %}fa-triangle-exclamation
+                                {% else %}fa-circle-info{% endif %}">
+                            </i>
+                            {{ message }}
+                            <button class="alert-close" onclick="this.parentElement.remove()">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% block content %}{% endblock %}
+        </div>
+
+        <footer class="page-footer">
+            <span>© 2026 Hospital de Emergencias Pediátricas — Panel Administrativo</span>
+            <span>Versión 1.0.0</span>
+        </footer>
+
+    </main>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <script src="{% static 'panel/js/base.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

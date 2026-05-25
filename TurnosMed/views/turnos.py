@@ -1,64 +1,20 @@
+# views/turnos.py
 import json
 import calendar
 from datetime import date, datetime
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.utils import timezone
 
-from TurnosMed.models import (
-    Area, Usuario, Turno,
-    SolicitudCambioTurno, SolicitudVacaciones, SolicitudDescansoMedico,
-)
+from TurnosMed.models import Turno
+from TurnosMed.views.utils import DIAS_ES, MESES_ES, get_personal, get_total_pendientes
 
-MESES_ES = [
-    '', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
-]
-
-DIAS_ES = {0:'Lun', 1:'Mar', 2:'Mié', 3:'Jue', 4:'Vie', 5:'Sáb', 6:'Dom'}
-
-# Códigos válidos
-CODIGOS_VALIDOS  = ['D', 'N', 'M', 'T', 'D4', 'N4']
-
-
-def codigo_para_pantalla(codigo_bd):
-    """Convierte D4→D y N4→N para mostrar en la tabla."""
-    if codigo_bd == 'D4':
-        return 'D4'  # ahora los mostramos tal cual
-    if codigo_bd == 'N4':
-        return 'N4'
-    return codigo_bd or ''
-
-
-def _get_personal(usuario):
-    """Devuelve el queryset de personal filtrado por tipo del jefe."""
-    qs = Usuario.objects.filter(
-        area=usuario.area,
-        rol='asistencial',
-        is_active=True
-    )
-    if usuario.tipo_trabajador == 'medico':
-        return qs.filter(tipo_trabajador='medico')
-    if usuario.tipo_trabajador in ['licenciada_enfermeria', 'tecnico_enfermeria']:
-        return qs.filter(
-            tipo_trabajador__in=['licenciada_enfermeria', 'tecnico_enfermeria']
-        )
-    return qs
-
-
-def _total_pendientes(area):
-    """Cuenta solicitudes pendientes del área para el badge del sidebar."""
-    return (
-        SolicitudCambioTurno.objects.filter(
-            solicitante__area=area, estado='pendiente').count()
-        + SolicitudVacaciones.objects.filter(
-            solicitante__area=area, estado='pendiente').count()
-        + SolicitudDescansoMedico.objects.filter(
-            solicitante__area=area, estado='pendiente').count()
-    )
+CODIGOS_VALIDOS = ['D', 'N', 'M', 'T', 'D4', 'N4']
 
 
 @login_required
@@ -69,21 +25,36 @@ def turnos(request):
         messages.error(request, 'No tiene permisos para acceder.')
         return redirect('signin')
 
-    if not usuario.area:
+    if usuario.es_jefe_departamento() and not usuario.departamento:
+        messages.error(request, 'Su usuario no tiene un departamento asignado.')
+        return redirect('home')
+
+    if usuario.es_jefe_area() and not usuario.area:
         messages.error(request, 'Su usuario no tiene un área asignada.')
         return redirect('home')
 
-    hoy  = timezone.now().date()
+    hoy = timezone.localdate()
     anio = int(request.GET.get('anio', hoy.year))
-    mes  = int(request.GET.get('mes',  hoy.month))
+    mes = int(request.GET.get('mes', hoy.month))
 
-    area_seleccionada = usuario.area
-    salas             = area_seleccionada.salas.filter(activa=True).order_by('nombre')
-
-    sala_id          = request.GET.get('sala')
+    # Filtros de área / sala
+    areas = []
+    salas = []
+    area_id = request.GET.get('area')
+    sala_id = request.GET.get('sala')
+    area_seleccionada = None
     sala_seleccionada = None
-    if sala_id and sala_id != 'all':
-        sala_seleccionada = salas.filter(id=sala_id).first()
+
+    if usuario.es_jefe_departamento():
+        areas = usuario.departamento.areas.filter(activo=True).order_by('nombre')
+        if area_id and area_id != 'all':
+            area_seleccionada = areas.filter(id=area_id).first()
+
+    elif usuario.es_jefe_area():
+        area_seleccionada = usuario.area
+        salas = usuario.area.salas.filter(activa=True).order_by('nombre')
+        if sala_id and sala_id != 'all':
+            sala_seleccionada = salas.filter(id=sala_id).first()
 
     # Días del mes
     primer_dia = date(anio, mes, 1)
@@ -91,25 +62,31 @@ def turnos(request):
 
     dias_mes = [
         {
-            'fecha':         date(anio, mes, d),
-            'nombre_dia':    DIAS_ES[date(anio, mes, d).weekday()],
-            'numero':        d,
+            'fecha': date(anio, mes, d),
+            'nombre_dia': DIAS_ES[date(anio, mes, d).weekday()],
+            'numero': d,
             'es_fin_semana': date(anio, mes, d).weekday() in [5, 6],
-            'es_domingo':    date(anio, mes, d).weekday() == 6,
+            'es_domingo': date(anio, mes, d).weekday() == 6,
         }
         for d in range(1, ultimo_dia.day + 1)
     ]
 
     # Navegación de meses
-    mes_anterior  = mes - 1 or 12
+    mes_anterior = mes - 1 or 12
     anio_anterior = anio if mes > 1 else anio - 1
     mes_siguiente = mes + 1 if mes < 12 else 1
     anio_siguiente = anio if mes < 12 else anio + 1
 
     # Personal filtrado
-    personal = _get_personal(usuario).order_by('apellidos', 'nombre')
-    if sala_seleccionada:
+    personal = get_personal(usuario)
+
+    if usuario.es_jefe_departamento() and area_seleccionada:
+        personal = personal.filter(area=area_seleccionada)
+
+    if usuario.es_jefe_area() and sala_seleccionada:
         personal = personal.filter(sala=sala_seleccionada)
+
+    personal = personal.order_by('rol', 'apellidos', 'nombre')
 
     # Turnos del mes
     turnos_mes = Turno.objects.filter(
@@ -118,47 +95,42 @@ def turnos(request):
     ).select_related('trabajador')
 
     turnos_map = {
-        f'{t.trabajador_id}-{t.fecha.isoformat()}': codigo_para_pantalla(t.codigo)
+        f'{t.trabajador_id}-{t.fecha.isoformat()}': t.codigo or ''
         for t in turnos_mes
     }
 
-    # Manejo del POST (guardar programación)
+    # POST: guardar programación
     if request.method == 'POST':
         try:
-            data             = json.loads(request.body)
+            data = json.loads(request.body)
             turnos_recibidos = data.get('turnos', [])
-            ids_validos      = set(personal.values_list('id', flat=True))
-
+            ids_validos = set(personal.values_list('id', flat=True))
             errores = []
 
             with transaction.atomic():
                 for item in turnos_recibidos:
-                    trabajador_id   = int(item.get('trabajador_id'))
-                    fecha_texto     = item.get('fecha')
-                    codigo_pantalla = (item.get('codigo') or '').strip().upper()
+                    trabajador_id = int(item.get('trabajador_id'))
+                    fecha_texto = item.get('fecha')
+                    codigo = (item.get('codigo') or '').strip().upper()
 
                     if trabajador_id not in ids_validos:
                         continue
 
-                    # Celda vacía = turno libre
-                    if codigo_pantalla == '':
+                    fecha_turno = datetime.strptime(fecha_texto, '%Y-%m-%d').date()
+
+                    # Celda vacía → turno libre (borrar si existía)
+                    if not codigo:
                         Turno.objects.filter(
                             trabajador_id=trabajador_id,
-                            fecha=datetime.strptime(fecha_texto, '%Y-%m-%d').date()
+                            fecha=fecha_turno
                         ).delete()
                         continue
 
-                    # Código no reconocido
-                    if codigo_pantalla not in CODIGOS_VALIDOS:
-                        errores.append(f'Código inválido: {codigo_pantalla}')
+                    if codigo not in CODIGOS_VALIDOS:
+                        errores.append(f'Código inválido: {codigo}')
                         continue
 
-                    trabajador  = personal.get(id=trabajador_id)
-                    fecha_turno = datetime.strptime(fecha_texto, '%Y-%m-%d').date()
-
-                    if codigo_pantalla not in CODIGOS_VALIDOS:
-                        errores.append(f'Código inválido: {codigo_pantalla}')
-                        continue
+                    trabajador = personal.get(id=trabajador_id)
 
                     # Validar cumpleaños
                     if trabajador.fecha_nacimiento:
@@ -170,74 +142,76 @@ def turnos(request):
                             )
                             continue
 
-                    # Validar que terceros tengan al menos un M o T en el mes
-                    # (advertencia, no bloqueo — se avisa al final)
-
-                    Turno.objects.update_or_create(
+                    turno, creado = Turno.objects.get_or_create(
                         trabajador_id=trabajador_id,
                         fecha=fecha_turno,
-                        defaults={
-                            'codigo':     codigo_pantalla,
-                            'creado_por': usuario,
-                        }
+                        defaults={'codigo': ''},
                     )
-
-            # Verificar terceros sin M/T después de guardar
-            advertencias = []
-            for p in personal.filter(condicion='tercero'):
-                tiene_medio = Turno.objects.filter(
-                    trabajador=p,
-                    fecha__year=anio,
-                    fecha__month=mes,
-                    codigo__in=['M', 'T']
-                ).exists()
-                if not tiene_medio:
-                    advertencias.append(
-                        f'{p.nombre_completo()} (tercero) no tiene turno M o T en el mes.'
-                    )
+                    turno.codigo = codigo
+                    turno.creado_por = usuario
+                    try:
+                        turno.save()
+                    except ValidationError as exc:
+                        if creado:
+                            turno.delete()
+                        errores.extend(exc.messages)
 
             return JsonResponse({
-                'ok':          True,
-                'errores':     errores,
-                'advertencias': advertencias,
-                'message':     'Programación guardada.' if not errores else
-                               f'Guardado con {len(errores)} error(es).'
+                'ok': True,
+                'errores': errores,
+                'advertencias': [],
+                'message': (
+                    'Programación guardada.'
+                    if not errores
+                    else f'Guardado con {len(errores)} error(es).'
+                ),
             })
 
         except Exception as e:
             return JsonResponse({'ok': False, 'error': str(e)}, status=400)
 
     # Construir filas para el template
-    filas = []
-    for idx, persona in enumerate(personal):
-        celdas = []
-        for dia in dias_mes:
-            clave  = f'{persona.id}-{dia["fecha"].isoformat()}'
-            codigo = turnos_map.get(clave, '')
-            celdas.append({
-                'fecha':         dia['fecha'],
-                'codigo':        codigo,
-                'es_fin_semana': dia['es_fin_semana'],
-                'es_domingo':    dia['es_domingo'],
-            })
-        filas.append({'index': idx, 'persona': persona, 'celdas': celdas})
+    filas = [
+        {
+            'index': idx,
+            'persona': persona,
+            'celdas': [
+                {
+                    'fecha': dia['fecha'],
+                    'codigo': turnos_map.get(f'{persona.id}-{dia["fecha"].isoformat()}', ''),
+                    'bloqueo': Turno(
+                        trabajador=persona,
+                        fecha=dia['fecha'],
+                        codigo='D',
+                    ).motivo_bloqueo(),
+                    'es_fin_semana': dia['es_fin_semana'],
+                    'es_domingo': dia['es_domingo'],
+                }
+                for dia in dias_mes
+            ],
+        }
+        for idx, persona in enumerate(personal)
+    ]
 
     context = {
-        'usuario':          usuario,
-        'hoy':              hoy,
+        'usuario': usuario,
+        'hoy': hoy,
+        'areas': areas,
+        'area_id': area_id,
         'area_seleccionada': area_seleccionada,
-        'salas':            salas,
+        'salas': salas,
+        'sala_id': sala_id,
         'sala_seleccionada': sala_seleccionada,
-        'dias_mes':         dias_mes,
-        'filas':            filas,
-        'anio':             anio,
-        'mes':              mes,
-        'nombre_mes':       MESES_ES[mes],
-        'mes_anterior':     mes_anterior,
-        'anio_anterior':    anio_anterior,
-        'mes_siguiente':    mes_siguiente,
-        'anio_siguiente':   anio_siguiente,
-        'total_pendientes': _total_pendientes(area_seleccionada),
+        'dias_mes': dias_mes,
+        'filas': filas,
+        'anio': anio,
+        'mes': mes,
+        'nombre_mes': MESES_ES[mes],
+        'mes_anterior': mes_anterior,
+        'anio_anterior': anio_anterior,
+        'mes_siguiente': mes_siguiente,
+        'anio_siguiente': anio_siguiente,
+        'total_pendientes': get_total_pendientes(usuario),
         'codigos_validos': CODIGOS_VALIDOS,
     }
     return render(request, 'turnos.html', context)
@@ -245,9 +219,11 @@ def turnos(request):
 
 @login_required
 def importar_excel(request):
+    # implementar importación desde Excel
     return redirect('turnos')
 
 
 @login_required
 def exportar_excel(request):
+    # implementar exportación a Excel
     return redirect('turnos')
