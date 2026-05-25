@@ -1,7 +1,7 @@
 # TurnioMed
 
 Sistema web académico para gestionar turnos, vacaciones y solicitudes del
-personal asistencial de una institución hospitalaria. La versión actual se
+personal asistencial del Hospital de Emergencias Pediatricas. La versión actual se
 implementa en Django y se divide en dos módulos web:
 
 - `AdminPanel`: operaciones del Administrador funcional o Jefe de Personal.
